@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "209648326780",
+    "project_id": "parkpass-ac893",
+    "storage_bucket": "parkpass-ac893.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:209648326780:android:707748c0c027633d0d51f9",
+        "android_client_info": {
+          "package_name": "com.example.parkpass"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDsZSYrlpI5vWGCIu9DT-wNCNRa6Yt9EaU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
