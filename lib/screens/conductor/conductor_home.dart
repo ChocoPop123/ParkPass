@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../models/trip_model.dart';
 import '../../services/trip_service.dart';
-import '../../services/invite_service.dart';
 import 'create_route_screen.dart';
 import 'create_trip_screen.dart';
 
@@ -16,7 +15,6 @@ class ConductorHome extends StatefulWidget {
 
 class _ConductorHomeState extends State<ConductorHome> {
   final TripService _tripService = TripService();
-  final InviteService _inviteService = InviteService();
 
   List<TripModel> _trips = [];
   bool _isLoading = true;
@@ -50,25 +48,6 @@ class _ConductorHomeState extends State<ConductorHome> {
         SnackBar(content: Text(e.toString())),
       );
     }
-  }
-
-  Future<void> _generateInvitation() async {
-    // Temporary until we connect to the operators table
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Generate Invitation"),
-        content: const Text(
-          "The invitation system is ready.\n\nNext we'll connect it to your operators table so it generates real one-time activation codes.",
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -127,17 +106,6 @@ class _ConductorHomeState extends State<ConductorHome> {
                       ),
                     ),
                   ],
-                ),
-
-                const SizedBox(height: 12),
-
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.badge_outlined),
-                    label: const Text("Generate Invitation"),
-                    onPressed: _generateInvitation,
-                  ),
                 ),
               ],
             ),

@@ -65,7 +65,7 @@ class _BackgroundOrbs extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: RadialGradient(
-                colors: [color.withOpacity(0.55), color.withOpacity(0.0)],
+                colors: [color.withValues(alpha: 0.55), color.withValues(alpha: 0.0)],
               ),
             ),
           ),
@@ -90,12 +90,12 @@ class GlassCard extends StatelessWidget {
           width: 340,
           padding: const EdgeInsets.fromLTRB(28, 36, 28, 28),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
+            color: Colors.white.withValues(alpha: 0.06),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.2),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.18), width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.35),
+                color: Colors.black.withValues(alpha: 0.35),
                 blurRadius: 30,
                 offset: const Offset(0, 15),
               ),
@@ -117,7 +117,7 @@ class AuthFieldLabel extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.55),
+        color: Colors.white.withValues(alpha: 0.55),
         fontSize: 11,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.8,
@@ -151,20 +151,25 @@ class GlassTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
         keyboardType: keyboardType,
         validator: validator,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
+        style: const TextStyle(
+          color: Colors.black87,
+          fontSize: 14,
+        ),
         cursorColor: kAuthAccentTeal,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+          hintStyle: const TextStyle(
+            color: Colors.black45,
+          ),
           border: InputBorder.none,
           errorBorder: InputBorder.none,
           focusedErrorBorder: InputBorder.none,
@@ -176,9 +181,9 @@ class GlassTextField extends StatelessWidget {
           suffixIcon: suffixIcon ??
               (suffixDot
                   ? const Padding(
-                padding: EdgeInsets.only(right: 16),
-                child: Icon(Icons.circle, color: kAuthAccentTeal, size: 8),
-              )
+                      padding: EdgeInsets.only(right: 16),
+                      child: Icon(Icons.circle, color: kAuthAccentTeal, size: 8),
+                    )
                   : null),
           suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         ),
@@ -216,7 +221,7 @@ class GlassGradientButton extends StatelessWidget {
           ),
           boxShadow: [
             BoxShadow(
-              color: kAuthGradientPink.withOpacity(0.35),
+              color: kAuthGradientPink.withValues(alpha: 0.35),
               blurRadius: 20,
               offset: const Offset(0, 8),
             ),
@@ -225,21 +230,21 @@ class GlassGradientButton extends StatelessWidget {
         alignment: Alignment.center,
         child: isLoading
             ? const SizedBox(
-          width: 22,
-          height: 22,
-          child: CircularProgressIndicator(
-            strokeWidth: 2.4,
-            valueColor: AlwaysStoppedAnimation(Colors.white),
-          ),
-        )
+                width: 22,
+                height: 22,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.4,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              )
             : Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
+                label,
+                style: const TextStyle(
+                  color: Colors.black87,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
       ),
     );
   }
@@ -259,9 +264,9 @@ class AuthErrorText extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF6B81).withOpacity(0.12),
+          color: const Color(0xFFFF6B81).withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFFF6B81).withOpacity(0.3)),
+          border: Border.all(color: const Color(0xFFFF6B81).withValues(alpha: 0.3)),
         ),
         child: Text(
           message,
@@ -291,9 +296,9 @@ class RoleToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -309,15 +314,15 @@ class RoleToggle extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   gradient: isSelected
                       ? const LinearGradient(
-                    colors: [kAuthGradientPink, kAuthGradientPurple],
-                  )
+                          colors: [kAuthGradientPink, kAuthGradientPurple],
+                        )
                       : null,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   labels[i],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),

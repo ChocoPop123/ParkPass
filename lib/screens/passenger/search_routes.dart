@@ -98,7 +98,7 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
         child: Column(
           children: [
             DropdownButtonFormField<String>(
-              value: fromCity,
+              initialValue: fromCity,
               decoration: const InputDecoration(
                 labelText: "From",
                 border: OutlineInputBorder(),
@@ -121,7 +121,7 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
             const SizedBox(height: 16),
 
             DropdownButtonFormField<String>(
-              value: toCity,
+              initialValue: toCity,
               decoration: const InputDecoration(
                 labelText: "To",
                 border: OutlineInputBorder(),

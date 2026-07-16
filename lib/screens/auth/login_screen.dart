@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Text(
                         'Sign in to your account',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -121,7 +121,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           _obscurePassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           size: 20,
                         ),
                         onPressed: () =>
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text(
                           "Don't have an account? Sign up",
-                          style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                         ),
                       ),
                     ),
