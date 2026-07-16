@@ -45,6 +45,7 @@ class TripService {
       'departure_time': departureTime.toIso8601String(),
       'vehicle_seat_count': seatCount,
       'max_cargo_kg': maxCargoKg,
+      'status': 'scheduled', // default status
     })
         .select()
         .single();
@@ -52,28 +53,36 @@ class TripService {
     final trip = TripModel.fromMap(tripData);
 
     // Generate one seat row per seat number
-    final seatRows = List.generate(
-      seatCount,
-          (index) => {
+    final List<Map<String, dynamic>> seatRows = [];
+
+    final seatsPerRow = 5; // Standard bus (2+3)
+
+    for (int i = 0; i < seatCount; i++) {
+      final row = i ~/ seatsPerRow;
+      final seat = (i % seatsPerRow) + 1;
+
+      final rowLetter = String.fromCharCode(65 + row);
+
+      seatRows.add({
         'trip_id': trip.id,
-        'seat_number': index + 1,
+        'seat_number': '$rowLetter$seat',
         'status': 'available',
-      },
-    );
+      });
+    }
+
     await supabase.from('seats').insert(seatRows);
 
     return trip;
   }
 
   Future<List<TripModel>> getTripsForConductor() async {
-    // For now: all trips (since routes aren't filtered by conductor yet).
-    // We'll refine this to "only trips on routes I created" once you have more than one conductor testing.
     final data = await supabase
         .from('trips')
         .select()
         .order('departure_time');
     return (data as List).map((t) => TripModel.fromMap(t)).toList();
   }
+
   Future<List<Map<String, dynamic>>> searchTrips({
     required String origin,
     required String destination,
@@ -83,10 +92,10 @@ class TripService {
         .select('''
         id,
         departure_time,
-        fare,
         routes!inner(
           origin,
-          destination
+          destination,
+          base_fare
         ),
         buses(
           bus_name

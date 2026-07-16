@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../utils/constants.dart';
 import '../../services/trip_service.dart';
+import '../seat_selection_screen.dart';
 
 class SearchRoutesScreen extends StatefulWidget {
   const SearchRoutesScreen({super.key});
@@ -38,7 +39,18 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
   Future<void> searchTrips() async {
     if (fromCity == null || toCity == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select origin and destination')),
+        const SnackBar(
+          content: Text('Please select origin and destination'),
+        ),
+      );
+      return;
+    }
+
+    if (fromCity == toCity) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Origin and destination cannot be the same'),
+        ),
       );
       return;
     }
@@ -53,14 +65,22 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
         destination: toCity!,
       );
 
+      if (!mounted) return;
+
       setState(() {
         trips = results;
       });
     } catch (e) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
+        SnackBar(
+          content: Text("Error: $e"),
+        ),
       );
     }
+
+    if (!mounted) return;
 
     setState(() {
       isLoading = false;
@@ -77,7 +97,6 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-
             DropdownButtonFormField<String>(
               value: fromCity,
               decoration: const InputDecoration(
@@ -85,10 +104,12 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                 border: OutlineInputBorder(),
               ),
               items: ugandaCities
-                  .map((city) => DropdownMenuItem(
-                value: city,
-                child: Text(city),
-              ))
+                  .map(
+                    (city) => DropdownMenuItem(
+                  value: city,
+                  child: Text(city),
+                ),
+              )
                   .toList(),
               onChanged: (value) {
                 setState(() {
@@ -97,7 +118,7 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
               },
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 16),
 
             DropdownButtonFormField<String>(
               value: toCity,
@@ -106,10 +127,12 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                 border: OutlineInputBorder(),
               ),
               items: ugandaCities
-                  .map((city) => DropdownMenuItem(
-                value: city,
-                child: Text(city),
-              ))
+                  .map(
+                    (city) => DropdownMenuItem(
+                  value: city,
+                  child: Text(city),
+                ),
+              )
                   .toList(),
               onChanged: (value) {
                 setState(() {
@@ -118,7 +141,7 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
               },
             ),
 
-            const SizedBox(height: 15),
+            const SizedBox(height: 16),
 
             ElevatedButton.icon(
               onPressed: pickDate,
@@ -143,9 +166,21 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
             const SizedBox(height: 20),
 
             if (isLoading)
-              const CircularProgressIndicator(),
-
-            if (!isLoading)
+              const Expanded(
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              )
+            else if (trips.isEmpty)
+              const Expanded(
+                child: Center(
+                  child: Text(
+                    "Search for buses to see available trips.",
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              )
+            else
               Expanded(
                 child: ListView.builder(
                   itemCount: trips.length,
@@ -153,21 +188,36 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                     final trip = trips[index];
 
                     return Card(
+                      margin: const EdgeInsets.only(bottom: 12),
                       child: ListTile(
                         leading: const Icon(Icons.directions_bus),
                         title: Text(
                           trip['buses']['bus_name'],
-                        ),
-                        subtitle: Text(
-                          "${trip['routes']['origin']} → ${trip['routes']['destination']}\n"
-                              "${trip['departure_time']}",
-                        ),
-                        trailing: Text(
-                          "UGX ${trip['fare']}",
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                           ),
                         ),
+                        subtitle: Text(
+                          "${trip['routes']['origin']} → ${trip['routes']['destination']}\n"
+                              "${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(trip['departure_time']))}",
+                        ),
+                        trailing: Text(
+                          "UGX ${trip['routes']['base_fare']}",
+                          style: const TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => SeatSelectionScreen(
+                                tripId: trip['id'],
+                              ),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },

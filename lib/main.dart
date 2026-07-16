@@ -13,9 +13,7 @@ Future<void> main() async {
 
   await Supabase.initialize(
     url: 'https://stfmxdhrijdezwxbpxlr.supabase.co',
-    anonKey:'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
-
-    
+    publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
   );
 
   runApp(const ParkPassApp());
@@ -59,19 +57,46 @@ class AuthGate extends StatelessWidget {
               );
             }
 
-            final role = roleSnapshot.data;
+            if (roleSnapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Error: ${roleSnapshot.error}'),
+                      ElevatedButton(
+                        onPressed: () => AuthService().signOut(),
+                        child: const Text('Sign Out'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
 
-            print('Logged in user: ${Supabase.instance.client.auth.currentUser?.email}');
-            print('Role from database: $role');
-            print('Error: ${roleSnapshot.error}');
+            final role = roleSnapshot.data;
 
             if (role == 'conductor') {
               return const ConductorHome();
             } else if (role == 'passenger') {
               return const PassengerHome();
             } else {
-              // Something went wrong (no profile row found)
-              return const LoginScreen();
+              // No profile found for this user
+              return Scaffold(
+                body: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text('No profile found. Please contact support or sign up again.'),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => AuthService().signOut(),
+                        child: const Text('Go to Login'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
           },
         );
