@@ -74,4 +74,27 @@ class TripService {
         .order('departure_time');
     return (data as List).map((t) => TripModel.fromMap(t)).toList();
   }
+  Future<List<Map<String, dynamic>>> searchTrips({
+    required String origin,
+    required String destination,
+  }) async {
+    final data = await supabase
+        .from('trips')
+        .select('''
+        id,
+        departure_time,
+        fare,
+        routes!inner(
+          origin,
+          destination
+        ),
+        buses(
+          bus_name
+        )
+      ''')
+        .eq('routes.origin', origin)
+        .eq('routes.destination', destination);
+
+    return List<Map<String, dynamic>>.from(data);
+  }
 }

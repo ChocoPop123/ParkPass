@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'search_routes.dart';
 
 class PassengerHome extends StatelessWidget {
   const PassengerHome({super.key});
@@ -16,7 +17,7 @@ class PassengerHome extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(child: Text('Welcome, passenger! Trips coming in Part 6.')),
+      body: const SearchRoutesScreen(),
     );
   }
 }

@@ -60,6 +60,11 @@ class AuthGate extends StatelessWidget {
             }
 
             final role = roleSnapshot.data;
+
+            print('Logged in user: ${Supabase.instance.client.auth.currentUser?.email}');
+            print('Role from database: $role');
+            print('Error: ${roleSnapshot.error}');
+
             if (role == 'conductor') {
               return const ConductorHome();
             } else if (role == 'passenger') {
