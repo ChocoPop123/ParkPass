@@ -87,7 +87,11 @@
   # example:
   # fonts:
   #   - family: Schyler
-  #     fonts:
+  #     fonts:dependencies:
+    #  flutter:
+    #    sdk: flutter
+    #
+   #  google_fonts: ^6.3.0
   #       - asset: fonts/Schyler-Regular.ttf
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic

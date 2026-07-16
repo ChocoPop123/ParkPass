@@ -31,7 +31,7 @@ class TripService {
     return (data as List).map((r) => RouteModel.fromMap(r)).toList();
   }
 
-  // Creates a trip AND generates all its seat rows in one go
+  // Creates a trip AND generates all its seat_widget.dart rows in one go
   Future<TripModel> createTrip({
     required String routeId,
     required DateTime departureTime,
@@ -52,7 +52,7 @@ class TripService {
 
     final trip = TripModel.fromMap(tripData);
 
-    // Generate one seat row per seat number
+    // Generate one seat_widget.dart row per seat_widget.dart number
     final List<Map<String, dynamic>> seatRows = [];
 
     final seatsPerRow = 5; // Standard bus (2+3)
