@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 /// Keeping these in one file means both screens stay visually in sync —
 /// change a color or radius here and it updates everywhere.
 
-const kAuthAccentBlue = Color(0xFF60A5FA);
-const kAuthAccentSkyBlue = Color(0xFF38BDF8);
+const kAuthAccentBlue = Color(0xFF3B82F6);
+const kAuthAccentSkyBlue = Color(0xFF2563EB);
 const kAuthAccentGreen = Color(0xFF34D399);
 const kAuthAccentMint = Color(0xFF6EE7B7);
 
@@ -154,6 +154,9 @@ class GlassTextField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType,
         validator: validator,
+        autofillHints: null,
+        enableSuggestions: false,
+        autocorrect: false,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         cursorColor: kAuthAccentMint,
         decoration: InputDecoration(
