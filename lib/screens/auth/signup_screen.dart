@@ -12,7 +12,9 @@ class SignupScreen extends StatefulWidget {
 
 class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _authService = AuthService();
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -45,13 +47,16 @@ class _SignupScreenState extends State<SignupScreen> {
         fullName: _nameController.text.trim(),
         role: _selectedRole,
       );
-      // If successful, main.dart's auth listener will handle navigation.
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
       });
     } finally {
-      if (mounted) setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -85,7 +90,7 @@ class _SignupScreenState extends State<SignupScreen> {
                       child: Text(
                         'Sign up to get started',
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.6),
+                          color: Colors.white.withValues(alpha: 0.6),
                           fontSize: 14,
                         ),
                       ),
@@ -143,7 +148,7 @@ class _SignupScreenState extends State<SignupScreen> {
                           _obscurePassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: Colors.white.withOpacity(0.5),
+                          color: Colors.white.withValues(alpha: 0.5),
                           size: 20,
                         ),
                         onPressed: () =>
@@ -181,7 +186,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                         child: Text(
                           'Already have an account? Log in',
-                          style: TextStyle(color: Colors.white.withOpacity(0.7)),
+                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
                         ),
                       ),
                     ),

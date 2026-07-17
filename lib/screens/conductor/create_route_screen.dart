@@ -58,7 +58,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
             ),
             TextField(
               controller: _fareController,
-              decoration: const InputDecoration(labelText: 'Base fare per seat (UGX)'),
+              decoration: const InputDecoration(labelText: 'Base fare per seat_widget.dart (UGX)'),
               keyboardType: TextInputType.number,
             ),
             TextField(

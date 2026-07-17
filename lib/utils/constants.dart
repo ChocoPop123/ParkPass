@@ -1,0 +1,16 @@
+const List<String> ugandaCities = [
+  'Kampala',
+  'Jinja',
+  'Mbale',
+  'Tororo',
+  'Fort Portal',
+  'Hoima',
+  'Kasese',
+  'Mbarara',
+  'Masaka',
+  'Ishaka',
+  'Kabale',
+  'Arua',
+  'Gulu',
+  'Soroti',
+];
