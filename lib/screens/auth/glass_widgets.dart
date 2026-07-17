@@ -5,11 +5,12 @@ import 'package:flutter/material.dart';
 /// Keeping these in one file means both screens stay visually in sync —
 /// change a color or radius here and it updates everywhere.
 
-const kAuthGradientPink = Color(0xFFE91E8C);
-const kAuthGradientPurple = Color(0xFF7C3AED);
-const kAuthAccentTeal = Color(0xFF2DD4BF);
+const kAuthAccentBlue = Color(0xFF60A5FA);
+const kAuthAccentSkyBlue = Color(0xFF38BDF8);
+const kAuthAccentGreen = Color(0xFF34D399);
+const kAuthAccentMint = Color(0xFF6EE7B7);
 
-/// Full-bleed dark background with blurred color orbs.
+/// Full-bleed background with blurred blue/green orbs and a faint bus mark.
 /// Wrap your Scaffold body's Stack with this at the bottom layer.
 class AuthBackground extends StatelessWidget {
   final Widget child;
@@ -20,53 +21,35 @@ class AuthBackground extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        Container(color: const Color(0xFF0B0B14)),
-        const _BackgroundOrbs(),
+        // Lighter, cooler base than pure black — dark teal-navy instead of dark purple.
+        Container(color: const Color(0xFF0E1A1B)),
+        const _BackgroundBus(),
         SafeArea(child: child),
       ],
     );
   }
 }
 
-class _BackgroundOrbs extends StatelessWidget {
-  const _BackgroundOrbs();
+/// A soft, blurred bus silhouette sitting behind the card — a subtle
+/// nod to the app's domain without competing with the form.
+class _BackgroundBus extends StatelessWidget {
+  const _BackgroundBus();
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        _orb(top: -80, left: -80, size: 260, color: kAuthGradientPink),
-        _orb(top: -40, right: -100, size: 280, color: kAuthAccentTeal),
-        _orb(bottom: -100, left: -60, size: 300, color: kAuthGradientPurple),
-        _orb(bottom: -60, right: -80, size: 240, color: const Color(0xFFD946EF)),
-      ],
-    );
-  }
-
-  Widget _orb({
-    double? top,
-    double? bottom,
-    double? left,
-    double? right,
-    required double size,
-    required Color color,
-  }) {
     return Positioned(
-      top: top,
-      bottom: bottom,
-      left: left,
-      right: right,
-      child: ClipRRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [color.withOpacity(0.55), color.withOpacity(0.0)],
-              ),
+      top: 90,
+      right: -40,
+      child: Transform.rotate(
+        angle: -0.12,
+        child: ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
+          child: Opacity(
+            opacity: 0.22,
+            child: Icon(
+              Icons.directions_bus_filled_rounded,
+              size: 260,
+              color: kAuthAccentMint,
             ),
           ),
         ),
@@ -75,7 +58,8 @@ class _BackgroundOrbs extends StatelessWidget {
   }
 }
 
-/// The frosted glass card that holds the form.
+/// The frosted glass card that holds the form — lighter and greener
+/// than a standard dark glass panel.
 class GlassCard extends StatelessWidget {
   final Widget child;
   const GlassCard({super.key, required this.child});
@@ -90,12 +74,22 @@ class GlassCard extends StatelessWidget {
           width: 340,
           padding: const EdgeInsets.fromLTRB(28, 36, 28, 28),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.06),
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                kAuthAccentBlue.withOpacity(0.14),
+                kAuthAccentGreen.withOpacity(0.10),
+              ],
+            ),
             borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: Colors.white.withOpacity(0.18), width: 1.2),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.28),
+              width: 1.2,
+            ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.35),
+                color: Colors.black.withOpacity(0.25),
                 blurRadius: 30,
                 offset: const Offset(0, 15),
               ),
@@ -117,7 +111,7 @@ class AuthFieldLabel extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.55),
+        color: Colors.white.withOpacity(0.65),
         fontSize: 11,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.8,
@@ -151,9 +145,9 @@ class GlassTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withOpacity(0.18)),
       ),
       child: TextFormField(
         controller: controller,
@@ -161,10 +155,10 @@ class GlassTextField extends StatelessWidget {
         keyboardType: keyboardType,
         validator: validator,
         style: const TextStyle(color: Colors.white, fontSize: 14),
-        cursorColor: kAuthAccentTeal,
+        cursorColor: kAuthAccentMint,
         decoration: InputDecoration(
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.35)),
+          hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
           border: InputBorder.none,
           errorBorder: InputBorder.none,
           focusedErrorBorder: InputBorder.none,
@@ -177,7 +171,7 @@ class GlassTextField extends StatelessWidget {
               (suffixDot
                   ? const Padding(
                 padding: EdgeInsets.only(right: 16),
-                child: Icon(Icons.circle, color: kAuthAccentTeal, size: 8),
+                child: Icon(Icons.circle, color: kAuthAccentMint, size: 8),
               )
                   : null),
           suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
@@ -187,7 +181,7 @@ class GlassTextField extends StatelessWidget {
   }
 }
 
-/// Gradient pill button with a built-in loading spinner state.
+/// Light glass-blue pill button with a built-in loading spinner state.
 class GlassGradientButton extends StatelessWidget {
   final String label;
   final bool isLoading;
@@ -210,14 +204,15 @@ class GlassGradientButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
           gradient: const LinearGradient(
-            colors: [kAuthGradientPink, kAuthGradientPurple],
+            colors: [kAuthAccentBlue, kAuthAccentSkyBlue],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
+          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1),
           boxShadow: [
             BoxShadow(
-              color: kAuthGradientPink.withOpacity(0.35),
-              blurRadius: 20,
+              color: kAuthAccentSkyBlue.withOpacity(0.45),
+              blurRadius: 22,
               offset: const Offset(0, 8),
             ),
           ],
@@ -245,8 +240,7 @@ class GlassGradientButton extends StatelessWidget {
   }
 }
 
-/// Inline error banner, styled to fit the glass theme
-/// (replaces the plain red Text used before).
+/// Inline error banner, styled to fit the glass theme.
 class AuthErrorText extends StatelessWidget {
   final String message;
   const AuthErrorText(this.message, {super.key});
@@ -291,9 +285,9 @@ class RoleToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.05),
+        color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.12)),
+        border: Border.all(color: Colors.white.withOpacity(0.18)),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -309,7 +303,7 @@ class RoleToggle extends StatelessWidget {
                   borderRadius: BorderRadius.circular(10),
                   gradient: isSelected
                       ? const LinearGradient(
-                    colors: [kAuthGradientPink, kAuthGradientPurple],
+                    colors: [kAuthAccentBlue, kAuthAccentSkyBlue],
                   )
                       : null,
                 ),
@@ -317,7 +311,7 @@ class RoleToggle extends StatelessWidget {
                 child: Text(
                   labels[i],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.5),
+                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.55),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),

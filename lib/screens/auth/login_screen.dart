@@ -139,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           'Forgot Password?',
                           style: TextStyle(
-                            color: kAuthGradientPink,
+                            color: kAuthAccentMint,
                             fontSize: 12,
                             fontWeight: FontWeight.w500,
                           ),
