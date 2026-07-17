@@ -160,6 +160,8 @@ class GlassTextField extends StatelessWidget {
         style: const TextStyle(color: Colors.white, fontSize: 14),
         cursorColor: kAuthAccentMint,
         decoration: InputDecoration(
+          filled: false,
+          fillColor: Colors.transparent,
           hintText: hint,
           hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
           border: InputBorder.none,
