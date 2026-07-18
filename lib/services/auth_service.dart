@@ -8,23 +8,28 @@ class AuthService {
     required String email,
     required String password,
     required String fullName,
-    required String role, // 'passenger' or 'conductor'
+    required String role, // 'passenger', 'conductor', or 'admin'
+    String? companyId,    // which company a conductor belongs to
   }) async {
     final response = await supabase.auth.signUp(
       email: email,
       password: password,
     );
 
-    final userId = response.user?.id;
-    if (userId == null) {
-      throw Exception('Signup failed, no user returned.');
+    if (response.session == null) {
+      throw Exception(
+        'Account created! Please check your email and click the confirmation link, then log in.',
+      );
     }
 
-    // Now create their profile row with the extra info
+    final userId = response.user!.id;
+
     await supabase.from('profiles').insert({
       'id': userId,
       'full_name': fullName,
       'role': role,
+      'company_id': companyId,
+      'approval_status': role == 'conductor' ? 'pending' : 'approved',
     });
   }
 
@@ -54,5 +59,19 @@ class AuthService {
         .single();
 
     return data['role'] as String?;
+  }
+
+  // Fetches the logged-in user's FULL profile row (role, company_id, approval_status)
+  Future<Map<String, dynamic>?> getCurrentUserProfile() async {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return null;
+
+    final data = await supabase
+        .from('profiles')
+        .select()
+        .eq('id', userId)
+        .single();
+
+    return data;
   }
 }

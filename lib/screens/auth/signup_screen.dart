@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import 'glass_widgets.dart';
+import '../../widgets/glass_widgets.dart';
 import 'login_screen.dart';
+import '../../models/company_model.dart';
+import '../../services/company_service.dart';
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -14,15 +16,26 @@ class _SignupScreenState extends State<SignupScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final _authService = AuthService();
+  final _companyService = CompanyService();
 
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  List<CompanyModel> _companies = [];
+  CompanyModel? _selectedCompany;
+  bool _isLoadingCompanies = true;
+
   String _selectedRole = 'passenger';
   bool _obscurePassword = true;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanies();
+  }
 
   @override
   void dispose() {
@@ -32,8 +45,21 @@ class _SignupScreenState extends State<SignupScreen> {
     super.dispose();
   }
 
+  Future<void> _loadCompanies() async {
+    final companies = await _companyService.getAllCompanies();
+    setState(() {
+      _companies = companies;
+      _isLoadingCompanies = false;
+    });
+  }
+
   Future<void> _handleSignup() async {
     if (!_formKey.currentState!.validate()) return;
+
+    if (_selectedRole == 'conductor' && _selectedCompany == null) {
+      setState(() => _errorMessage = 'Please select a company.');
+      return;
+    }
 
     setState(() {
       _isLoading = true;
@@ -46,6 +72,7 @@ class _SignupScreenState extends State<SignupScreen> {
         password: _passwordController.text.trim(),
         fullName: _nameController.text.trim(),
         role: _selectedRole,
+        companyId: _selectedRole == 'conductor' ? _selectedCompany!.id : null,
       );
     } catch (e) {
       setState(() {
@@ -160,11 +187,62 @@ class _SignupScreenState extends State<SignupScreen> {
                     const AuthFieldLabel('I AM A'),
                     const SizedBox(height: 8),
                     RoleToggle(
-                      roles: const ['passenger', 'conductor'],
-                      labels: const ['Passenger', 'Conductor'],
+                      roles: const ['passenger', 'conductor', 'admin'],
+                      labels: const ['Passenger', 'Conductor', 'Admin'],
                       selected: _selectedRole,
                       onChanged: (value) => setState(() => _selectedRole = value),
                     ),
+
+                    if (_selectedRole == 'conductor') ...[
+                      const SizedBox(height: 20),
+                      const AuthFieldLabel('COMPANY'),
+                      const SizedBox(height: 8),
+                      _isLoadingCompanies
+                          ? const Center(
+                        child: CircularProgressIndicator(color: kAuthAccentMint),
+                      )
+                          : _companies.isEmpty
+                          ? Text(
+                        'No companies registered yet — ask a company admin to sign up first.',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.5),
+                          fontSize: 12,
+                        ),
+                      )
+                          : Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.08),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.18),
+                          ),
+                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<CompanyModel>(
+                            isExpanded: true,
+                            dropdownColor: const Color(0xFF17242A),
+                            value: _selectedCompany,
+                            hint: Text(
+                              'Select a company',
+                              style: TextStyle(
+                                color: Colors.white.withValues(alpha: 0.4),
+                              ),
+                            ),
+                            style: const TextStyle(color: Colors.white),
+                            items: _companies.map((c) {
+                              return DropdownMenuItem(
+                                value: c,
+                                child: Text(c.name),
+                              );
+                            }).toList(),
+                            onChanged: (value) =>
+                                setState(() => _selectedCompany = value),
+                          ),
+                        ),
+                      ),
+                    ],
+
                     const SizedBox(height: 24),
 
                     if (_errorMessage != null) AuthErrorText(_errorMessage!),

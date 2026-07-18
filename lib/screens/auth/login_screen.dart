@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
-import 'glass_widgets.dart';
+import '../../widgets/glass_widgets.dart';
 import 'signup_screen.dart';
 
 class LoginScreen extends StatefulWidget {
