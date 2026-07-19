@@ -40,7 +40,9 @@ class _LoginScreenState extends State<LoginScreen> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      // main.dart's auth listener handles navigation after this.
+      if (mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     } catch (e) {
       setState(() {
         _errorMessage = 'Login failed. Check your email and password.';
