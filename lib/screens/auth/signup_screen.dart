@@ -4,6 +4,8 @@ import '../../widgets/glass_widgets.dart';
 import 'login_screen.dart';
 import '../../models/company_model.dart';
 import '../../services/company_service.dart';
+import '../../main.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -81,6 +83,14 @@ class _SignupScreenState extends State<SignupScreen> {
         role: _selectedRole,
         companyId: _selectedRole == 'conductor' ? _selectedCompany!.id : null,
       );
+
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthGate()),
+              (route) => false,
+        );
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
