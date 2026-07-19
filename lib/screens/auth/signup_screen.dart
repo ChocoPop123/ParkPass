@@ -46,11 +46,18 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _loadCompanies() async {
-    final companies = await _companyService.getAllCompanies();
-    setState(() {
-      _companies = companies;
-      _isLoadingCompanies = false;
-    });
+    try {
+      final companies = await _companyService.getAllCompanies();
+      setState(() {
+        _companies = companies;
+        _isLoadingCompanies = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCompanies = false;
+        _errorMessage = 'Could not load companies: $e';
+      });
+    }
   }
 
   Future<void> _handleSignup() async {
