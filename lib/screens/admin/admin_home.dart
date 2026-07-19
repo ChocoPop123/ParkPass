@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/company_service.dart';
 import '../../widgets/glass_widgets.dart';
+import 'admin_profile_screen.dart';
 
 class AdminHome extends StatefulWidget {
   final String companyId;
@@ -50,9 +51,25 @@ class _AdminHomeState extends State<AdminHome> {
                 children: [
                   const Text('Company Admin',
                       style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
-                  IconButton(
-                    icon: const Icon(Icons.logout, color: Colors.white70),
-                    onPressed: () => Supabase.instance.client.auth.signOut(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.person_outline, color: Colors.white70),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => AdminProfileScreen(companyId: widget.companyId),
+                            ),
+                          );
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout, color: Colors.white70),
+                        onPressed: () => Supabase.instance.client.auth.signOut(),
+                      ),
+                    ],
                   ),
                 ],
               ),

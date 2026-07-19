@@ -7,6 +7,7 @@ import 'screens/conductor/conductor_home.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/create_company_screen.dart';
 import 'screens/admin/admin_home.dart';
+import 'screens/conductor/conductor_shell.dart';
 import 'screens/conductor/pending_approval_screen.dart';
 
 Future<void> main() async {
