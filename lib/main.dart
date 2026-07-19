@@ -1,6 +1,3 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/auth_service.dart';
@@ -55,6 +52,20 @@ class AuthGate extends StatelessWidget {
               return const Scaffold(body: Center(child: CircularProgressIndicator()));
             }
 
+            if (profileSnapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Error loading profile: ${profileSnapshot.error}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              );
+            }
+
             final profile = profileSnapshot.data;
             if (profile == null) return const LoginScreen();
 
@@ -63,9 +74,13 @@ class AuthGate extends StatelessWidget {
             final approvalStatus = profile['approval_status'] as String?;
 
             if (role == 'admin') {
-              return companyId == null ? const CreateCompanyScreen() : AdminHome(companyId: companyId);
+              return companyId == null
+                  ? const CreateCompanyScreen()
+                  : AdminHome(companyId: companyId);
             } else if (role == 'conductor') {
-              return approvalStatus == 'approved' ? const ConductorHome() : const PendingApprovalScreen();
+              return approvalStatus == 'approved'
+                  ? const ConductorHome()
+                  : const PendingApprovalScreen();
             } else if (role == 'passenger') {
               return const PassengerHome();
             } else {

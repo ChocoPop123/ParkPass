@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/company_service.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../main.dart';
 
 class CreateCompanyScreen extends StatefulWidget {
   const CreateCompanyScreen({super.key});
@@ -31,7 +32,13 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
         contactPhone: _phoneController.text.trim(),
         contactEmail: _emailController.text.trim(),
       );
-      if (mounted) Navigator.of(context).popUntil((route) => route.isFirst);
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthGate()),
+              (route) => false,
+        );
+      }
+
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
