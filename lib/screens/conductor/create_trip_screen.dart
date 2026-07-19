@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import '../../models/route_model.dart';
 import '../../services/trip_service.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../models/trip_model.dart';
 
 class CreateTripScreen extends StatefulWidget {
-  const CreateTripScreen({super.key});
+  final TripModel? existingTrip;
+  const CreateTripScreen({super.key, this.existingTrip});
 
   @override
   State<CreateTripScreen> createState() => _CreateTripScreenState();
@@ -31,6 +33,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.existingTrip != null) {
+      final t = widget.existingTrip!;
+      _seatCountController.text = t.vehicleSeatCount.toString();
+      _maxCargoController.text = t.maxCargoKg.toString();
+      _plateController.text = t.busNumberPlate ?? '';
+      _colorController.text = t.busColor ?? '';
+      _driverNameController.text = t.driverName ?? '';
+      _driverContactController.text = t.driverContact ?? '';
+      _fareOverrideController.text = t.fareOverride?.toString() ?? '';
+      _busClass = t.busClass;
+      _selectedDateTime = t.departureTime;
+    }
     _loadRoutes();
   }
 
@@ -40,6 +54,9 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
       setState(() {
         _routes = routes;
         _isLoadingRoutes = false;
+        if (widget.existingTrip != null) {
+          _selectedRoute = routes.where((r) => r.id == widget.existingTrip!.routeId).firstOrNull;
+        }
       });
     } catch (e) {
       setState(() {
@@ -78,20 +95,38 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     });
 
     try {
-      await _tripService.createTrip(
-        routeId: _selectedRoute!.id,
-        departureTime: _selectedDateTime!,
-        seatCount: int.parse(_seatCountController.text.trim()),
-        maxCargoKg: double.parse(_maxCargoController.text.trim()),
-        busNumberPlate: _plateController.text.trim().isEmpty ? null : _plateController.text.trim(),
-        busColor: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
-        busClass: _busClass,
-        driverName: _driverNameController.text.trim().isEmpty ? null : _driverNameController.text.trim(),
-        driverContact: _driverContactController.text.trim().isEmpty ? null : _driverContactController.text.trim(),
-        fareOverride: _fareOverrideController.text.trim().isEmpty
-            ? null
-            : double.parse(_fareOverrideController.text.trim()),
-      );
+      if (widget.existingTrip != null) {
+        await _tripService.updateTrip(
+          tripId: widget.existingTrip!.id,
+          routeId: _selectedRoute!.id,
+          departureTime: _selectedDateTime!,
+          seatCount: int.parse(_seatCountController.text.trim()),
+          maxCargoKg: double.parse(_maxCargoController.text.trim()),
+          busNumberPlate: _plateController.text.trim().isEmpty ? null : _plateController.text.trim(),
+          busColor: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+          busClass: _busClass,
+          driverName: _driverNameController.text.trim().isEmpty ? null : _driverNameController.text.trim(),
+          driverContact: _driverContactController.text.trim().isEmpty ? null : _driverContactController.text.trim(),
+          fareOverride: _fareOverrideController.text.trim().isEmpty
+              ? null
+              : double.parse(_fareOverrideController.text.trim()),
+        );
+      } else {
+        await _tripService.createTrip(
+          routeId: _selectedRoute!.id,
+          departureTime: _selectedDateTime!,
+          seatCount: int.parse(_seatCountController.text.trim()),
+          maxCargoKg: double.parse(_maxCargoController.text.trim()),
+          busNumberPlate: _plateController.text.trim().isEmpty ? null : _plateController.text.trim(),
+          busColor: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
+          busClass: _busClass,
+          driverName: _driverNameController.text.trim().isEmpty ? null : _driverNameController.text.trim(),
+          driverContact: _driverContactController.text.trim().isEmpty ? null : _driverContactController.text.trim(),
+          fareOverride: _fareOverrideController.text.trim().isEmpty
+              ? null
+              : double.parse(_fareOverrideController.text.trim()),
+        );
+      }
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() => _errorMessage = e.toString());

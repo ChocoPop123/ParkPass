@@ -1,6 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/route_model.dart';
 import '../models/trip_model.dart';
+import '../models/booking_model.dart';
 
 class TripService {
   final supabase = Supabase.instance.client;
@@ -85,5 +86,48 @@ class TripService {
         .select('*, routes(origin, destination, base_fare)')
         .order('departure_time');
     return (data as List).map((t) => TripModel.fromMap(t)).toList();
+  }
+
+  Future<void> updateTripStatus(String tripId, String status) async {
+    await supabase.from('trips').update({'status': status}).eq('id', tripId);
+  }
+
+  Future<void> deleteTrip(String tripId) async {
+    await supabase.from('trips').delete().eq('id', tripId);
+  }
+
+  Future<void> updateTrip({
+    required String tripId,
+    required String routeId,
+    required DateTime departureTime,
+    required int seatCount,
+    required double maxCargoKg,
+    String? busNumberPlate,
+    String? busColor,
+    String busClass = 'Ordinary',
+    String? driverName,
+    String? driverContact,
+    double? fareOverride,
+  }) async {
+    await supabase.from('trips').update({
+      'route_id': routeId,
+      'departure_time': departureTime.toIso8601String(),
+      'vehicle_seat_count': seatCount,
+      'max_cargo_kg': maxCargoKg,
+      'bus_number_plate': busNumberPlate,
+      'bus_color': busColor,
+      'bus_class': busClass,
+      'driver_name': driverName,
+      'driver_contact': driverContact,
+      'fare_override': fareOverride,
+    }).eq('id', tripId);
+  }
+
+  Future<List<BookingModel>> getManifestForTrip(String tripId) async {
+    final data = await supabase
+        .from('bookings')
+        .select('*, profiles(full_name), seats(seat_number)')
+        .eq('trip_id', tripId);
+    return (data as List).map((b) => BookingModel.fromMap(b)).toList();
   }
 }

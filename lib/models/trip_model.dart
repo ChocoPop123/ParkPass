@@ -62,6 +62,14 @@ class TripModel {
 
   double get remainingCargoKg => maxCargoKg - cargoKgBooked;
 
+  bool get isPastDeparture =>
+      DateTime.now().isAfter(departureTime.add(const Duration(minutes: 5)));
+
+// What we actually show on screen — auto-flips to "departed" once 5 minutes
+// past departure, without touching the real database status.
+  String get displayStatus =>
+      (status == 'scheduled' && isPastDeparture) ? 'departed' : status;
+
   // The actual fare a passenger pays: the trip's own override if set,
   // otherwise the route's base fare.
   double get effectiveFare => fareOverride ?? routeBaseFare ?? 0;

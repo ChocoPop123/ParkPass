@@ -53,4 +53,24 @@ class CompanyService {
   Future<void> setConductorApproval(String conductorId, String status) async {
     await supabase.from('profiles').update({'approval_status': status}).eq('id', conductorId);
   }
+
+  Future<void> updateCompany({
+    required String companyId,
+    required String name,
+    required String registrationNumber,
+    required String contactPhone,
+    required String contactEmail,
+  }) async {
+    await supabase.from('companies').update({
+      'name': name,
+      'registration_number': registrationNumber,
+      'contact_phone': contactPhone,
+      'contact_email': contactEmail,
+    }).eq('id', companyId);
+  }
+
+  Future<CompanyModel> getCompanyById(String id) async {
+    final data = await supabase.from('companies').select().eq('id', id).single();
+    return CompanyModel.fromMap(data);
+  }
 }
