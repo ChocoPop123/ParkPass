@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/company_service.dart';
+import '../../services/profile_service.dart';
 import '../../widgets/glass_widgets.dart';
 
 class ConductorProfileScreen extends StatefulWidget {
@@ -14,13 +17,16 @@ class ConductorProfileScreen extends StatefulWidget {
 class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
   final _authService = AuthService();
   final _companyService = CompanyService();
+  final _profileService = ProfileService();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
 
   String? _companyName;
   String? _email;
+  String? _avatarUrl;
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isUploadingAvatar = false;
   String? _message;
 
   @override
@@ -35,6 +41,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
       _email = Supabase.instance.client.auth.currentUser?.email;
       _nameController.text = profile?['full_name'] ?? '';
       _phoneController.text = profile?['phone'] ?? '';
+      _avatarUrl = profile?['avatar_url'] as String?;
 
       final companyId = profile?['company_id'] as String?;
       if (companyId != null) {
@@ -44,6 +51,22 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
       setState(() => _isLoading = false);
     } catch (_) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (picked == null) return;
+
+    setState(() => _isUploadingAvatar = true);
+    try {
+      final url = await _profileService.uploadAvatar(File(picked.path));
+      setState(() => _avatarUrl = url);
+    } catch (e) {
+      setState(() => _message = 'Could not upload photo: $e');
+    } finally {
+      if (mounted) setState(() => _isUploadingAvatar = false);
     }
   }
 
@@ -92,6 +115,32 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: GestureDetector(
+                        onTap: _isUploadingAvatar ? null : _pickAndUploadAvatar,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 44,
+                              backgroundColor: Colors.white.withOpacity(0.1),
+                              backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
+                              child: _isUploadingAvatar
+                                  ? const CircularProgressIndicator(color: kAuthAccentMint)
+                                  : (_avatarUrl == null
+                                  ? const Icon(Icons.person, color: Colors.white54, size: 40)
+                                  : null),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(color: kAuthAccentBlue, shape: BoxShape.circle),
+                              child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     const AuthFieldLabel('EMAIL'),
                     const SizedBox(height: 6),
                     Text(_email ?? '—', style: const TextStyle(color: Colors.white70)),
