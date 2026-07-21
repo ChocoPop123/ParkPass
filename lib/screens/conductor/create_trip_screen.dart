@@ -51,12 +51,22 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   Future<void> _loadRoutes() async {
     try {
       final routes = await _tripService.getAllRoutes();
+
+      // Manual lookup instead of firstOrNull, so we don't need package:collection.
+      RouteModel? matchedRoute;
+      if (widget.existingTrip != null) {
+        for (final r in routes) {
+          if (r.id == widget.existingTrip!.routeId) {
+            matchedRoute = r;
+            break;
+          }
+        }
+      }
+
       setState(() {
         _routes = routes;
         _isLoadingRoutes = false;
-        if (widget.existingTrip != null) {
-          _selectedRoute = routes.where((r) => r.id == widget.existingTrip!.routeId).firstOrNull;
-        }
+        _selectedRoute = matchedRoute;
       });
     } catch (e) {
       setState(() {
@@ -178,8 +188,10 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     icon: const Icon(Icons.arrow_back, color: Colors.white70),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text('Schedule a Trip',
-                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text(
+                    widget.existingTrip != null ? 'Edit Trip' : 'Schedule a Trip',
+                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
@@ -294,7 +306,11 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                     const SizedBox(height: 22),
 
                     if (_errorMessage != null) AuthErrorText(_errorMessage!),
-                    GlassGradientButton(label: 'Create Trip', isLoading: _isLoading, onTap: _handleCreate),
+                    GlassGradientButton(
+                      label: widget.existingTrip != null ? 'Save Changes' : 'Create Trip',
+                      isLoading: _isLoading,
+                      onTap: _handleCreate,
+                    ),
                   ],
                 ),
               ),

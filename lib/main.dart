@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/passenger/passenger_home.dart';
-import 'screens/conductor/conductor_home.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/create_company_screen.dart';
 import 'screens/admin/admin_home.dart';
@@ -80,7 +79,7 @@ class AuthGate extends StatelessWidget {
                   : AdminHome(companyId: companyId);
             } else if (role == 'conductor') {
               return approvalStatus == 'approved'
-                  ? const ConductorHome()
+                  ? const ConductorShell()
                   : const PendingApprovalScreen();
             } else if (role == 'passenger') {
               return const PassengerHome();
