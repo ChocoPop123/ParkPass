@@ -44,7 +44,8 @@ class _CompanyPickerContentState extends State<_CompanyPickerContent> {
 
   void _onSearch() {
     final q = _searchController.text.toLowerCase();
-    setState(() => _filtered = _all.where((c) => c.name.toLowerCase().contains(q)).toList());
+    setState(() => _filtered = _all.where((c) =>
+    c.name.toLowerCase().contains(q) || (c.username?.contains(q) ?? false)).toList());
   }
 
   @override
@@ -123,7 +124,15 @@ class _CompanyLogoRow extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             Expanded(
-              child: Text(company.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(company.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  if (company.username != null)
+                    Text('@${company.username}',
+                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                ],
+              ),
             ),
           ],
         ),

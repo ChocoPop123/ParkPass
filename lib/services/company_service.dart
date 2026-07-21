@@ -10,8 +10,17 @@ class CompanyService {
     return (data as List).map((c) => CompanyModel.fromMap(c)).toList();
   }
 
+  Future<bool> isUsernameAvailable(String username, {String? excludingCompanyId}) async {
+    final query = excludingCompanyId != null
+        ? supabase.from('companies').select('id').eq('username', username).neq('id', excludingCompanyId)
+        : supabase.from('companies').select('id').eq('username', username);
+    final data = await query;
+    return (data as List).isEmpty;
+  }
+
   Future<CompanyModel> createCompany({
     required String name,
+    required String username,
     required String registrationNumber,
     required String contactPhone,
     required String contactEmail,
@@ -23,6 +32,7 @@ class CompanyService {
           .from('companies')
           .insert({
         'name': name,
+        'username': username.toLowerCase().trim(),
         'registration_number': registrationNumber,
         'contact_phone': contactPhone,
         'contact_email': contactEmail,
@@ -38,6 +48,12 @@ class CompanyService {
       if (e.toString().contains('companies_name_unique')) {
         throw Exception('A company with this name is already registered.');
       }
+      if (e.toString().contains('companies_username_unique')) {
+        throw Exception('That username is already taken.');
+      }
+      if (e.toString().contains('companies_username_format')) {
+        throw Exception('Username must be 3-20 characters: lowercase letters, numbers, underscores only.');
+      }
       rethrow;
     }
   }
@@ -45,16 +61,28 @@ class CompanyService {
   Future<void> updateCompany({
     required String companyId,
     required String name,
+    String? username,
     required String registrationNumber,
     required String contactPhone,
     required String contactEmail,
   }) async {
-    await supabase.from('companies').update({
-      'name': name,
-      'registration_number': registrationNumber,
-      'contact_phone': contactPhone,
-      'contact_email': contactEmail,
-    }).eq('id', companyId);
+    try {
+      await supabase.from('companies').update({
+        'name': name,
+        if (username != null) 'username': username.toLowerCase().trim(),
+        'registration_number': registrationNumber,
+        'contact_phone': contactPhone,
+        'contact_email': contactEmail,
+      }).eq('id', companyId);
+    } catch (e) {
+      if (e.toString().contains('companies_username_unique')) {
+        throw Exception('That username is already taken.');
+      }
+      if (e.toString().contains('companies_username_format')) {
+        throw Exception('Username must be 3-20 characters: lowercase letters, numbers, underscores only.');
+      }
+      rethrow;
+    }
   }
 
   Future<CompanyModel> getCompanyById(String id) async {

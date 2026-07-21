@@ -20,6 +20,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   final _nameController = TextEditingController();
   final _companyNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _regController = TextEditingController();
   final _phoneController = TextEditingController();
   final _companyEmailController = TextEditingController();
@@ -30,12 +31,27 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   bool _isSaving = false;
   bool _isUploadingLogo = false;
   bool _darkModeOn = true; // cosmetic only for now
+  bool? _usernameAvailable; // null = not checked yet / invalid format / unchanged
+  String? _originalUsername;
   String? _message;
 
   @override
   void initState() {
     super.initState();
     _load();
+    _usernameController.addListener(_checkUsername);
+  }
+
+  @override
+  void dispose() {
+    _usernameController.removeListener(_checkUsername);
+    _nameController.dispose();
+    _companyNameController.dispose();
+    _usernameController.dispose();
+    _regController.dispose();
+    _phoneController.dispose();
+    _companyEmailController.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -46,6 +62,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
       final company = await _companyService.getCompanyById(widget.companyId);
       _companyNameController.text = company.name;
+      _usernameController.text = company.username ?? '';
+      _originalUsername = company.username;
       _regController.text = company.registrationNumber ?? '';
       _phoneController.text = company.contactPhone ?? '';
       _companyEmailController.text = company.contactEmail ?? '';
@@ -55,6 +73,27 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
     } catch (_) {
       setState(() => _isLoading = false);
     }
+  }
+
+  Future<void> _checkUsername() async {
+    final username = _usernameController.text.trim().toLowerCase();
+
+    // Unchanged from what's already saved — nothing to validate.
+    if (username == (_originalUsername ?? '')) {
+      setState(() => _usernameAvailable = null);
+      return;
+    }
+
+    if (!RegExp(r'^[a-z0-9_]{3,20}$').hasMatch(username)) {
+      setState(() => _usernameAvailable = null);
+      return;
+    }
+
+    final available = await _companyService.isUsernameAvailable(
+      username,
+      excludingCompanyId: widget.companyId,
+    );
+    if (mounted) setState(() => _usernameAvailable = available);
   }
 
   Future<void> _pickAndUploadLogo() async {
@@ -87,11 +126,13 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       await _companyService.updateCompany(
         companyId: widget.companyId,
         name: _companyNameController.text.trim(),
+        username: _usernameController.text.trim(),
         registrationNumber: _regController.text.trim(),
         contactPhone: _phoneController.text.trim(),
         contactEmail: _companyEmailController.text.trim(),
       );
 
+      _originalUsername = _usernameController.text.trim().toLowerCase();
       setState(() => _message = 'Saved.');
     } catch (e) {
       setState(() => _message = 'Could not save: $e');
@@ -188,6 +229,26 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     const AuthFieldLabel('COMPANY NAME'),
                     const SizedBox(height: 8),
                     GlassTextField(controller: _companyNameController, hint: 'Company name'),
+                    const SizedBox(height: 16),
+                    const AuthFieldLabel('USERNAME'),
+                    const SizedBox(height: 8),
+                    GlassTextField(
+                      controller: _usernameController,
+                      hint: 'e.g. linkbus',
+                      suffixIcon: _usernameAvailable == null
+                          ? null
+                          : Icon(
+                        _usernameAvailable! ? Icons.check_circle : Icons.cancel,
+                        color: _usernameAvailable! ? kAuthAccentGreen : const Color(0xFFFF6B81),
+                        size: 18,
+                      ),
+                    ),
+                    if (_usernameAvailable == false)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6),
+                        child: Text('Already taken.',
+                            style: TextStyle(color: const Color(0xFFFF6B81), fontSize: 11)),
+                      ),
                     const SizedBox(height: 16),
                     const AuthFieldLabel('REGISTRATION NUMBER'),
                     const SizedBox(height: 8),

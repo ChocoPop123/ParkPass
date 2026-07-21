@@ -259,7 +259,18 @@ class _SignupScreenState extends State<SignupScreen> {
                                       child: c.logoUrl == null ? const Icon(Icons.directions_bus, color: Colors.white54, size: 12) : null,
                                     ),
                                     const SizedBox(width: 10),
-                                    Text(c.name),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(c.name),
+                                        if (c.username != null)
+                                          Text(
+                                            '@${c.username}',
+                                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                                          ),
+                                      ],
+                                    ),
                                   ],
                                 ),
                               );
