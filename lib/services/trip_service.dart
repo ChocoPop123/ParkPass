@@ -78,16 +78,6 @@ class TripService {
     return trip;
   }
 
-  // Fetches trips joined with their route info (origin, destination, base fare)
-  // so the UI can show the route name and compute the effective fare.
-  Future<List<TripModel>> getTripsForConductor() async {
-    final data = await supabase
-        .from('trips')
-        .select('*, routes(origin, destination, base_fare)')
-        .order('departure_time');
-    return (data as List).map((t) => TripModel.fromMap(t)).toList();
-  }
-
   Future<void> updateTripStatus(String tripId, String status) async {
     await supabase.from('trips').update({'status': status}).eq('id', tripId);
   }
@@ -129,5 +119,28 @@ class TripService {
         .select('*, profiles(full_name), seats(seat_number)')
         .eq('trip_id', tripId);
     return (data as List).map((b) => BookingModel.fromMap(b)).toList();
+  }
+
+  // Fetches trips joined with their route info (origin, destination, base fare)
+  // so the UI can show the route name and compute the effective fare.
+  Future<List<TripModel>> getTripsForConductor() async {
+    final data = await supabase
+        .from('trips')
+        .select('*, routes(origin, destination, base_fare)')
+        .order('departure_time');
+    return (data as List).map((t) => TripModel.fromMap(t)).toList();
+  }
+
+  Future<int> getRouteCountForCompany(String companyId) async {
+    final data = await supabase.from('routes').select('id').eq('company_id', companyId);
+    return (data as List).length;
+  }
+
+  Future<int> getTripCountForCompany(String companyId) async {
+    final data = await supabase
+        .from('trips')
+        .select('id, routes!inner(company_id)')
+        .eq('routes.company_id', companyId);
+    return (data as List).length;
   }
 }

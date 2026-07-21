@@ -4,6 +4,7 @@ class CompanyModel {
   final String? registrationNumber;
   final String? contactPhone;
   final String? contactEmail;
+  final String? logoUrl;
 
   CompanyModel({
     required this.id,
@@ -11,6 +12,7 @@ class CompanyModel {
     this.registrationNumber,
     this.contactPhone,
     this.contactEmail,
+    this.logoUrl,
   });
 
   factory CompanyModel.fromMap(Map<String, dynamic> map) {
@@ -20,6 +22,7 @@ class CompanyModel {
       registrationNumber: map['registration_number'],
       contactPhone: map['contact_phone'],
       contactEmail: map['contact_email'],
+      logoUrl: map['logo_url'] as String?,
     );
   }
 }

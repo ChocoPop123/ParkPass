@@ -5,9 +5,10 @@ import 'screens/auth/login_screen.dart';
 import 'screens/passenger/passenger_home.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/create_company_screen.dart';
-import 'screens/admin/admin_home.dart';
 import 'screens/conductor/conductor_shell.dart';
 import 'screens/conductor/pending_approval_screen.dart';
+import 'screens/admin/admin_shell.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -76,7 +77,7 @@ class AuthGate extends StatelessWidget {
             if (role == 'admin') {
               return companyId == null
                   ? const CreateCompanyScreen()
-                  : AdminHome(companyId: companyId);
+                  : AdminShell(companyId: companyId);
             } else if (role == 'conductor') {
               return approvalStatus == 'approved'
                   ? const ConductorShell()

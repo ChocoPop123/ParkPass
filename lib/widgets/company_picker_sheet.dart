@@ -80,13 +80,50 @@ class _CompanyPickerContentState extends State<_CompanyPickerContent> {
                 itemCount: _filtered.length,
                 itemBuilder: (context, index) {
                   final company = _filtered[index];
-                  return GlassListRow(
-                    icon: Icons.directions_bus,
-                    title: company.name,
+                  return _CompanyLogoRow(
+                    company: company,
                     onTap: () => Navigator.pop(context, company),
                   );
                 },
               ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CompanyLogoRow extends StatelessWidget {
+  final CompanyModel company;
+  final VoidCallback onTap;
+  const _CompanyLogoRow({required this.company, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.06),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: Colors.white.withOpacity(0.14)),
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundImage: company.logoUrl != null ? NetworkImage(company.logoUrl!) : null,
+              child: company.logoUrl == null
+                  ? const Icon(Icons.directions_bus, color: Colors.white54, size: 18)
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(company.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
             ),
           ],
         ),

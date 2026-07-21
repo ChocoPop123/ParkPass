@@ -250,7 +250,18 @@ class _SignupScreenState extends State<SignupScreen> {
                             items: _companies.map((c) {
                               return DropdownMenuItem(
                                 value: c,
-                                child: Text(c.name),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.white.withOpacity(0.1),
+                                      backgroundImage: c.logoUrl != null ? NetworkImage(c.logoUrl!) : null,
+                                      child: c.logoUrl == null ? const Icon(Icons.directions_bus, color: Colors.white54, size: 12) : null,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Text(c.name),
+                                  ],
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) =>

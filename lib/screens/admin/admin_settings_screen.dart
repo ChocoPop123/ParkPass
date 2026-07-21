@@ -1,18 +1,20 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/company_service.dart';
 import '../../widgets/glass_widgets.dart';
 
-class AdminProfileScreen extends StatefulWidget {
+class AdminSettingsScreen extends StatefulWidget {
   final String companyId;
-  const AdminProfileScreen({super.key, required this.companyId});
+  const AdminSettingsScreen({super.key, required this.companyId});
 
   @override
-  State<AdminProfileScreen> createState() => _AdminProfileScreenState();
+  State<AdminSettingsScreen> createState() => _AdminSettingsScreenState();
 }
 
-class _AdminProfileScreenState extends State<AdminProfileScreen> {
+class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   final _authService = AuthService();
   final _companyService = CompanyService();
 
@@ -23,8 +25,11 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
   final _companyEmailController = TextEditingController();
 
   String? _email;
+  String? _logoUrl;
   bool _isLoading = true;
   bool _isSaving = false;
+  bool _isUploadingLogo = false;
+  bool _darkModeOn = true; // cosmetic only for now
   String? _message;
 
   @override
@@ -44,10 +49,27 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
       _regController.text = company.registrationNumber ?? '';
       _phoneController.text = company.contactPhone ?? '';
       _companyEmailController.text = company.contactEmail ?? '';
+      _logoUrl = company.logoUrl;
 
       setState(() => _isLoading = false);
     } catch (_) {
       setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _pickAndUploadLogo() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    if (picked == null) return;
+
+    setState(() => _isUploadingLogo = true);
+    try {
+      final url = await _companyService.uploadLogo(widget.companyId, File(picked.path));
+      setState(() => _logoUrl = url);
+    } catch (e) {
+      setState(() => _message = 'Could not upload logo: $e');
+    } finally {
+      if (mounted) setState(() => _isUploadingLogo = false);
     }
   }
 
@@ -80,29 +102,61 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AuthBackground(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  const Text('Profile & Company', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
-                ],
+              const Text('Settings', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+              IconButton(
+                icon: const Icon(Icons.logout, color: Colors.white70),
+                onPressed: () => Supabase.instance.client.auth.signOut(),
               ),
-              const SizedBox(height: 16),
-              GlassPanel(
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
-                    : Column(
+            ],
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GlassPanel(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  : SingleChildScrollView(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    Center(
+                      child: GestureDetector(
+                        onTap: _isUploadingLogo ? null : _pickAndUploadLogo,
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            CircleAvatar(
+                              radius: 44,
+                              backgroundColor: Colors.white.withOpacity(0.1),
+                              backgroundImage: _logoUrl != null ? NetworkImage(_logoUrl!) : null,
+                              child: _isUploadingLogo
+                                  ? const CircularProgressIndicator(color: kAuthAccentMint)
+                                  : (_logoUrl == null
+                                  ? const Icon(Icons.directions_bus, color: Colors.white54, size: 36)
+                                  : null),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: const BoxDecoration(color: kAuthAccentBlue, shape: BoxShape.circle),
+                              child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: Text('Company logo', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                    ),
+                    const SizedBox(height: 20),
+
                     const AuthFieldLabel('EMAIL'),
                     const SizedBox(height: 6),
                     Text(_email ?? '—', style: const TextStyle(color: Colors.white70)),
@@ -110,6 +164,24 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                     const AuthFieldLabel('YOUR NAME'),
                     const SizedBox(height: 8),
                     GlassTextField(controller: _nameController, hint: 'Your name'),
+
+                    const SizedBox(height: 22),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text('Dark mode', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
+                        Switch(
+                          value: _darkModeOn,
+                          activeColor: kAuthAccentMint,
+                          onChanged: (v) => setState(() => _darkModeOn = v),
+                        ),
+                      ],
+                    ),
+                    Text(
+                      'Note: this toggle is cosmetic for now \u2014 full app-wide theming needs your theme file wired in.',
+                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
+                    ),
+
                     const SizedBox(height: 22),
                     Text('COMPANY DETAILS', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1)),
                     const SizedBox(height: 12),
@@ -138,9 +210,9 @@ class _AdminProfileScreenState extends State<AdminProfileScreen> {
                   ],
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
