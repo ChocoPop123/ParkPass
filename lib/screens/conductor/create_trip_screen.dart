@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/route_model.dart';
 import '../../services/trip_service.dart';
+import '../../widgets/glass_widgets.dart';
 
 class CreateTripScreen extends StatefulWidget {
   const CreateTripScreen({super.key});
@@ -86,57 +87,125 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Schedule a Trip')),
-      body: _isLoadingRoutes
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text('Route'),
-            DropdownButton<RouteModel>(
-              isExpanded: true,
-              value: _selectedRoute,
-              hint: const Text('Select a route'),
-              items: _routes.map((route) {
-                return DropdownMenuItem(
-                  value: route,
-                  child: Text('${route.origin} → ${route.destination}'),
-                );
-              }).toList(),
-              onChanged: (value) => setState(() => _selectedRoute = value),
+      backgroundColor: Colors.transparent,
+      body: AuthBackground(
+        child: SafeArea(
+          child: _isLoadingRoutes
+              ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+              : SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "Schedule Trip",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  "Create a new journey for passengers",
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const AuthFieldLabel('ROUTE'),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<RouteModel>(
+                      isExpanded: true,
+                      dropdownColor: const Color(0xFF17242A),
+                      value: _selectedRoute,
+                      hint: Text(
+                        'Select a route',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: _routes.map((route) {
+                        return DropdownMenuItem(
+                          value: route,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${route.origin} → ${route.destination}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "UGX ${route.baseFare.toStringAsFixed(0)}",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) => setState(() => _selectedRoute = value),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('NUMBER OF SEATS'),
+                const SizedBox(height: 8),
+                GlassTextField(
+                  controller: _seatCountController,
+                  hint: '14',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('MAX CARGO CAPACITY (KG)'),
+                const SizedBox(height: 8),
+                GlassTextField(
+                  controller: _maxCargoController,
+                  hint: '100',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('DEPARTURE TIME'),
+                const SizedBox(height: 8),
+                GlassSelectorChip(
+                  icon: Icons.calendar_today,
+                  label: _selectedDateTime == null
+                      ? 'Pick departure date & time'
+                      : _selectedDateTime.toString(),
+                  onTap: _pickDateTime,
+                ),
+                const SizedBox(height: 32),
+                if (_errorMessage != null) AuthErrorText(_errorMessage!),
+                GlassGradientButton(
+                  label: 'Create Trip',
+                  isLoading: _isLoading,
+                  onTap: _handleCreate,
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _seatCountController,
-              decoration: const InputDecoration(labelText: 'Number of seats'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _maxCargoController,
-              decoration: const InputDecoration(labelText: 'Max cargo capacity (kg)'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _pickDateTime,
-              child: Text(
-                _selectedDateTime == null
-                    ? 'Pick departure date & time'
-                    : _selectedDateTime.toString(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            if (_errorMessage != null)
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: _handleCreate,
-              child: const Text('Create Trip'),
-            ),
-          ],
+          ),
         ),
       ),
     );

@@ -55,7 +55,7 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                       style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
                   Text('Before you can approve conductors and manage routes, register your bus company.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 13)),
                   const SizedBox(height: 24),
                   const AuthFieldLabel('COMPANY NAME'),
                   const SizedBox(height: 8),

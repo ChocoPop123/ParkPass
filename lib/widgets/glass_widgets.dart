@@ -78,18 +78,18 @@ class GlassCard extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                kAuthAccentBlue.withOpacity(0.14),
-                kAuthAccentGreen.withOpacity(0.10),
+                kAuthAccentBlue.withValues(alpha: 0.14),
+                kAuthAccentGreen.withValues(alpha: 0.10),
               ],
             ),
             borderRadius: BorderRadius.circular(28),
             border: Border.all(
-              color: Colors.white.withOpacity(0.28),
+              color: Colors.white.withValues(alpha: 0.28),
               width: 1.2,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.25),
+                color: Colors.black.withValues(alpha: 0.25),
                 blurRadius: 30,
                 offset: const Offset(0, 15),
               ),
@@ -111,7 +111,7 @@ class AuthFieldLabel extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.65),
+        color: Colors.white.withValues(alpha: 0.65),
         fontSize: 11,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.8,
@@ -145,9 +145,9 @@ class GlassTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       child: TextFormField(
         controller: controller,
@@ -163,7 +163,7 @@ class GlassTextField extends StatelessWidget {
           filled: false,
           fillColor: Colors.transparent,
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+          hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
           border: InputBorder.none,
           errorBorder: InputBorder.none,
           focusedErrorBorder: InputBorder.none,
@@ -213,10 +213,10 @@ class GlassGradientButton extends StatelessWidget {
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,
           ),
-          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.35), width: 1),
           boxShadow: [
             BoxShadow(
-              color: kAuthAccentSkyBlue.withOpacity(0.45),
+              color: kAuthAccentSkyBlue.withValues(alpha: 0.45),
               blurRadius: 22,
               offset: const Offset(0, 8),
             ),
@@ -258,9 +258,9 @@ class AuthErrorText extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF6B81).withOpacity(0.12),
+          color: const Color(0xFFFF6B81).withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFFF6B81).withOpacity(0.3)),
+          border: Border.all(color: const Color(0xFFFF6B81).withValues(alpha: 0.3)),
         ),
         child: Text(
           message,
@@ -290,9 +290,9 @@ class RoleToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -316,7 +316,7 @@ class RoleToggle extends StatelessWidget {
                 child: Text(
                   labels[i],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.55),
+                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.55),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -361,14 +361,14 @@ class GlassPanel extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                kAuthAccentBlue.withOpacity(0.14),
-                kAuthAccentGreen.withOpacity(0.10),
+                kAuthAccentBlue.withValues(alpha: 0.14),
+                kAuthAccentGreen.withValues(alpha: 0.10),
               ],
             ),
             borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: Colors.white.withOpacity(0.28), width: 1.2),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.28), width: 1.2),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 30, offset: const Offset(0, 15)),
+              BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 30, offset: const Offset(0, 15)),
             ],
           ),
           child: child,
@@ -399,9 +399,9 @@ class GlassSelectorChip extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
+          color: Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.18)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
         ),
         child: Row(
           children: [
@@ -413,7 +413,7 @@ class GlassSelectorChip extends StatelessWidget {
                 style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
               ),
             ),
-            Icon(Icons.unfold_more, color: Colors.white.withOpacity(0.4)),
+            Icon(Icons.unfold_more, color: Colors.white.withValues(alpha: 0.4)),
           ],
         ),
       ),
@@ -447,9 +447,9 @@ class GlassListRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.14)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
         child: Row(
           children: [
@@ -463,12 +463,12 @@ class GlassListRow extends StatelessWidget {
                   if (subtitle != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
-                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                     ),
                 ],
               ),
             ),
-            if (trailing != null) trailing!,
+            ?trailing,
           ],
         ),
       ),
@@ -493,9 +493,9 @@ class GlassIconAction extends StatelessWidget {
         height: 36,
         margin: const EdgeInsets.only(left: 6),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
+          color: color.withValues(alpha: 0.15),
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withValues(alpha: 0.4)),
         ),
         child: Icon(icon, color: color, size: 18),
       ),

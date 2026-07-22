@@ -64,7 +64,7 @@ class _AdminHomeState extends State<AdminHome> {
                       : _pending.isEmpty
                       ? Center(
                     child: Text('No pending conductor requests.',
-                        style: TextStyle(color: Colors.white.withOpacity(0.6))),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.6))),
                   )
                       : ListView.builder(
                     itemCount: _pending.length,

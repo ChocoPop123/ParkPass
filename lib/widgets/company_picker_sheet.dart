@@ -75,7 +75,7 @@ class _CompanyPickerContentState extends State<_CompanyPickerContent> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                   : _filtered.isEmpty
-                  ? Center(child: Text('No companies found.', style: TextStyle(color: Colors.white.withOpacity(0.5))))
+                  ? Center(child: Text('No companies found.', style: TextStyle(color: Colors.white.withValues(alpha: 0.5))))
                   : ListView.builder(
                 itemCount: _filtered.length,
                 itemBuilder: (context, index) {

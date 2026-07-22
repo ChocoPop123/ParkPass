@@ -52,7 +52,19 @@ class AuthGate extends StatelessWidget {
           future: AuthService().getCurrentUserProfile(),
           builder: (context, profileSnapshot) {
             if (profileSnapshot.connectionState == ConnectionState.waiting) {
-              return const Scaffold(body: Center(child: CircularProgressIndicator()));
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            if (profileSnapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Text(
+                    profileSnapshot.error.toString(),
+                  ),
+                ),
+              );
             }
 
             final profile = profileSnapshot.data;

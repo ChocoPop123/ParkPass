@@ -19,7 +19,24 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
   bool _isLoading = false;
   String? _errorMessage;
 
+  @override
+  void dispose() {
+    _originController.dispose();
+    _destinationController.dispose();
+    _fareController.dispose();
+    _cargoPriceController.dispose();
+    super.dispose();
+  }
+
   Future<void> _handleCreate() async {
+    if (_originController.text.isEmpty || 
+        _destinationController.text.isEmpty || 
+        _fareController.text.isEmpty || 
+        _cargoPriceController.text.isEmpty) {
+      setState(() => _errorMessage = 'Please fill all fields');
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -36,7 +53,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
@@ -44,7 +61,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Create Route')),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -58,7 +75,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
             ),
             TextField(
               controller: _fareController,
-              decoration: const InputDecoration(labelText: 'Base fare per seat_widget.dart (UGX)'),
+              decoration: const InputDecoration(labelText: 'Base fare per seat (UGX)'),
               keyboardType: TextInputType.number,
             ),
             TextField(
@@ -66,15 +83,21 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
               decoration: const InputDecoration(labelText: 'Cargo price per kg (UGX)'),
               keyboardType: TextInputType.number,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             if (_errorMessage != null)
-              Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+              ),
             _isLoading
                 ? const CircularProgressIndicator()
-                : ElevatedButton(
-              onPressed: _handleCreate,
-              child: const Text('Create Route'),
-            ),
+                : SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _handleCreate,
+                      child: const Text('Create Route'),
+                    ),
+                  ),
           ],
         ),
       ),

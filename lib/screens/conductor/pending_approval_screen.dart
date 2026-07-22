@@ -24,7 +24,7 @@ class PendingApprovalScreen extends StatelessWidget {
                   Text(
                     "Your account is waiting for approval from your company's admin. Check back soon.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white.withOpacity(0.65)),
+                    style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
                   ),
                   const SizedBox(height: 20),
                   TextButton(
