@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/trip_service.dart';
+import '../../services/auth_service.dart';
 
 class CreateRouteScreen extends StatefulWidget {
   const CreateRouteScreen({super.key});
@@ -11,6 +12,7 @@ class CreateRouteScreen extends StatefulWidget {
 
 class _CreateRouteScreenState extends State<CreateRouteScreen> {
   final _tripService = TripService();
+  final _authService = AuthService();
   final _originController = TextEditingController();
   final _destinationController = TextEditingController();
   final _fareController = TextEditingController();
@@ -43,11 +45,19 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
     });
 
     try {
+      final profile = await _authService.getCurrentUserProfile();
+      final companyId = profile?['company_id'];
+
+      if (companyId == null) {
+        throw Exception('User profile has no associated company.');
+      }
+
       await _tripService.createRoute(
         origin: _originController.text.trim(),
         destination: _destinationController.text.trim(),
         baseFare: double.parse(_fareController.text.trim()),
         cargoPricePerKg: double.parse(_cargoPriceController.text.trim()),
+        companyId: companyId,
       );
       if (mounted) Navigator.pop(context, true); // true = "something was created"
     } catch (e) {

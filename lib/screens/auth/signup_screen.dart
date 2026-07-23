@@ -4,6 +4,8 @@ import '../../widgets/glass_widgets.dart';
 import 'login_screen.dart';
 import '../../models/company_model.dart';
 import '../../services/company_service.dart';
+import '../../main.dart';
+
 
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
@@ -46,11 +48,18 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   Future<void> _loadCompanies() async {
-    final companies = await _companyService.getAllCompanies();
-    setState(() {
-      _companies = companies;
-      _isLoadingCompanies = false;
-    });
+    try {
+      final companies = await _companyService.getAllCompanies();
+      setState(() {
+        _companies = companies;
+        _isLoadingCompanies = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingCompanies = false;
+        _errorMessage = 'Could not load companies: $e';
+      });
+    }
   }
 
   Future<void> _handleSignup() async {
@@ -74,6 +83,14 @@ class _SignupScreenState extends State<SignupScreen> {
         role: _selectedRole,
         companyId: _selectedRole == 'conductor' ? _selectedCompany!.id : null,
       );
+
+
+      if (mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const AuthGate()),
+              (route) => false,
+        );
+      }
     } catch (e) {
       setState(() {
         _errorMessage = e.toString();
@@ -233,7 +250,29 @@ class _SignupScreenState extends State<SignupScreen> {
                             items: _companies.map((c) {
                               return DropdownMenuItem(
                                 value: c,
-                                child: Text(c.name),
+                                child: Row(
+                                  children: [
+                                    CircleAvatar(
+                                      radius: 12,
+                                      backgroundColor: Colors.white.withOpacity(0.1),
+                                      backgroundImage: c.logoUrl != null ? NetworkImage(c.logoUrl!) : null,
+                                      child: c.logoUrl == null ? const Icon(Icons.directions_bus, color: Colors.white54, size: 12) : null,
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(c.name),
+                                        if (c.username != null)
+                                          Text(
+                                            '@${c.username}',
+                                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                                          ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               );
                             }).toList(),
                             onChanged: (value) =>

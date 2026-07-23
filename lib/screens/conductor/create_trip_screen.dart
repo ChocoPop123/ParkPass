@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../models/route_model.dart';
+import '../../models/trip_model.dart';
 import '../../services/trip_service.dart';
 import '../../widgets/glass_widgets.dart';
 
 class CreateTripScreen extends StatefulWidget {
-  const CreateTripScreen({super.key});
+  final TripModel? existingTrip;
+  const CreateTripScreen({super.key, this.existingTrip});
 
   @override
   State<CreateTripScreen> createState() => _CreateTripScreenState();
@@ -12,8 +15,8 @@ class CreateTripScreen extends StatefulWidget {
 
 class _CreateTripScreenState extends State<CreateTripScreen> {
   final _tripService = TripService();
-  final _seatCountController = TextEditingController(text: '14');
-  final _maxCargoController = TextEditingController(text: '100');
+  late final TextEditingController _seatCountController;
+  late final TextEditingController _maxCargoController;
 
   List<RouteModel> _routes = [];
   RouteModel? _selectedRoute;
@@ -25,7 +28,20 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   @override
   void initState() {
     super.initState();
+    _seatCountController = TextEditingController(
+        text: widget.existingTrip?.vehicleSeatCount.toString() ?? '14');
+    _maxCargoController = TextEditingController(
+        text: widget.existingTrip?.maxCargoKg.toString() ?? '100');
+    _selectedDateTime = widget.existingTrip?.departureTime;
+
     _loadRoutes();
+  }
+
+  @override
+  void dispose() {
+    _seatCountController.dispose();
+    _maxCargoController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadRoutes() async {
@@ -33,21 +49,29 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     setState(() {
       _routes = routes;
       _isLoadingRoutes = false;
+
+      if (widget.existingTrip != null) {
+        try {
+          _selectedRoute = routes.firstWhere(
+              (r) => r.id == widget.existingTrip!.routeId);
+        } catch (_) {}
+      }
     });
   }
 
   Future<void> _pickDateTime() async {
+    final initialDate = _selectedDateTime ?? DateTime.now();
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: initialDate.isBefore(DateTime.now()) ? DateTime.now() : initialDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 30)), // Allow some buffer for historical edits if needed
       lastDate: DateTime.now().add(const Duration(days: 90)),
     );
     if (date == null || !mounted) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.now(),
+      initialTime: TimeOfDay.fromDateTime(initialDate),
     );
     if (time == null) return;
 
@@ -70,22 +94,33 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     });
 
     try {
-      await _tripService.createTrip(
-        routeId: _selectedRoute!.id,
-        departureTime: _selectedDateTime!,
-        seatCount: int.parse(_seatCountController.text.trim()),
-        maxCargoKg: double.parse(_maxCargoController.text.trim()),
-      );
+      if (widget.existingTrip != null) {
+        await _tripService.updateTrip(
+          tripId: widget.existingTrip!.id,
+          routeId: _selectedRoute!.id,
+          departureTime: _selectedDateTime!,
+          seatCount: int.parse(_seatCountController.text.trim()),
+          maxCargoKg: double.parse(_maxCargoController.text.trim()),
+        );
+      } else {
+        await _tripService.createTrip(
+          routeId: _selectedRoute!.id,
+          departureTime: _selectedDateTime!,
+          seatCount: int.parse(_seatCountController.text.trim()),
+          maxCargoKg: double.parse(_maxCargoController.text.trim()),
+        );
+      }
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.existingTrip != null;
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AuthBackground(
@@ -107,18 +142,18 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   ],
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  "Schedule Trip",
-                  style: TextStyle(
+                Text(
+                  isEditing ? "Update Trip" : "Schedule Trip",
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 const SizedBox(height: 8),
-                const Text(
-                  "Create a new journey for passengers",
-                  style: TextStyle(
+                Text(
+                  isEditing ? "Update journey details" : "Create a new journey for passengers",
+                  style: const TextStyle(
                     color: Colors.white70,
                     fontSize: 15,
                   ),
@@ -193,13 +228,13 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
                   icon: Icons.calendar_today,
                   label: _selectedDateTime == null
                       ? 'Pick departure date & time'
-                      : _selectedDateTime.toString(),
+                      : DateFormat('dd MMM yyyy, hh:mm a').format(_selectedDateTime!),
                   onTap: _pickDateTime,
                 ),
                 const SizedBox(height: 32),
                 if (_errorMessage != null) AuthErrorText(_errorMessage!),
                 GlassGradientButton(
-                  label: 'Create Trip',
+                  label: isEditing ? 'Update Trip' : 'Create Trip',
                   isLoading: _isLoading,
                   onTap: _handleCreate,
                 ),

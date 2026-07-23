@@ -1,16 +1,14 @@
-
-
-
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/passenger/passenger_home.dart';
-import 'screens/conductor/conductor_home.dart';
 import 'theme/app_theme.dart';
 import 'screens/admin/create_company_screen.dart';
-import 'screens/admin/admin_home.dart';
+import 'screens/conductor/conductor_shell.dart';
 import 'screens/conductor/pending_approval_screen.dart';
+import 'screens/admin/admin_shell.dart';
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -67,6 +65,20 @@ class AuthGate extends StatelessWidget {
               );
             }
 
+            if (profileSnapshot.hasError) {
+              return Scaffold(
+                body: Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Text(
+                      'Error loading profile: ${profileSnapshot.error}',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+              );
+            }
+
             final profile = profileSnapshot.data;
             if (profile == null) return const LoginScreen();
 
@@ -75,9 +87,13 @@ class AuthGate extends StatelessWidget {
             final approvalStatus = profile['approval_status'] as String?;
 
             if (role == 'admin') {
-              return companyId == null ? const CreateCompanyScreen() : AdminHome(companyId: companyId);
+              return companyId == null
+                  ? const CreateCompanyScreen()
+                  : AdminShell(companyId: companyId);
             } else if (role == 'conductor') {
-              return approvalStatus == 'approved' ? const ConductorHome() : const PendingApprovalScreen();
+              return approvalStatus == 'approved'
+                  ? const ConductorShell()
+                  : const PendingApprovalScreen();
             } else if (role == 'passenger') {
               return const PassengerHome();
             } else {
