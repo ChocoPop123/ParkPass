@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../models/company_model.dart';
+import '../../utils/constants.dart';
 import '../../widgets/company_picker_sheet.dart';
 import '../../widgets/glass_widgets.dart';
+import 'search_routes.dart'; // Adjust import path if needed
 
 class PassengerHome extends StatefulWidget {
   const PassengerHome({super.key});
@@ -28,6 +30,62 @@ class _PassengerHomeState extends State<PassengerHome> {
     }
   }
 
+  // --- CITY PICKER BOTTOM SHEET ---
+  void _showCityPicker({required bool isOrigin}) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 400,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isOrigin ? "Select Origin City" : "Select Destination City",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: ugandaCities.length,
+                  itemBuilder: (context, index) {
+                    final city = ugandaCities[index];
+                    return ListTile(
+                      leading: const Icon(Icons.location_city, color: Colors.white70),
+                      title: Text(
+                        city,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          if (isOrigin) {
+                            _origin = city;
+                          } else {
+                            _destination = city;
+                          }
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   void _onNavTapped(int index) {
     setState(() => _currentIndex = index);
 
@@ -36,30 +94,34 @@ class _PassengerHomeState extends State<PassengerHome> {
         break;
 
       case 1:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => const SearchRoutesScreen(),
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => SearchRoutesScreen(
+              initialOrigin: _origin,
+              initialDestination: _destination,
+              initialDate: _selectedDate,
+            ),
+          ),
+        );
         break;
 
       case 2:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => const MyTicketsScreen(),
-        //   ),
-        // );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => const MyTicketsScreen(),
+      //   ),
+      // );
         break;
 
       case 3:
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (_) => const PassengerProfileScreen(),
-        //   ),
-        // );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => const PassengerProfileScreen(),
+      //   ),
+      // );
         break;
     }
   }
@@ -206,13 +268,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                             Icons.location_on,
                             "From",
                             _origin ?? "Select Departure",
-                            () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("From tapped"),
-                                ),
-                              );
-                            },
+                                () => _showCityPicker(isOrigin: true),
                           ),
 
                           const SizedBox(height: 12),
@@ -221,13 +277,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                             Icons.flag,
                             "To",
                             _destination ?? "Select Destination",
-                            () {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text("Destination tapped"),
-                                ),
-                              );
-                            },
+                                () => _showCityPicker(isOrigin: false),
                           ),
 
                           const SizedBox(height: 12),
@@ -238,7 +288,7 @@ class _PassengerHomeState extends State<PassengerHome> {
                             _selectedDate == null
                                 ? "Choose Date"
                                 : DateFormat('dd MMM, yyyy')
-                                    .format(_selectedDate!),
+                                .format(_selectedDate!),
                             _selectDate,
                           ),
 
@@ -248,13 +298,42 @@ class _PassengerHomeState extends State<PassengerHome> {
                             width: double.infinity,
                             child: ElevatedButton(
                               onPressed: () {
-                                // TODO: Handle search
+                                if (_origin == null || _destination == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Please select Origin and Destination"),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                if (_origin == _destination) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text("Origin and Destination cannot be the same"),
+                                      backgroundColor: Colors.redAccent,
+                                    ),
+                                  );
+                                  return;
+                                }
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => SearchRoutesScreen(
+                                      initialOrigin: _origin,
+                                      initialDestination: _destination,
+                                      initialDate: _selectedDate,
+                                    ),
+                                  ),
+                                );
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: const Color(0xFF2F80ED),
                                 foregroundColor: Colors.white,
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 16),
+                                const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(18),
                                 ),
@@ -303,11 +382,11 @@ class _PassengerHomeState extends State<PassengerHome> {
   }
 
   Widget _buildInfoTile(
-    IconData icon,
-    String title,
-    String subtitle,
-    VoidCallback onTap,
-  ) {
+      IconData icon,
+      String title,
+      String subtitle,
+      VoidCallback onTap,
+      ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -371,6 +450,17 @@ class _PassengerHomeState extends State<PassengerHome> {
           color: Colors.white70,
           size: 18,
         ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SearchRoutesScreen(
+                initialOrigin: from,
+                initialDestination: to,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

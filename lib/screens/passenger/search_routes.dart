@@ -6,7 +6,17 @@ import '../../widgets/glass_widgets.dart';
 import '../seat_selection_screen.dart';
 
 class SearchRoutesScreen extends StatefulWidget {
-  const SearchRoutesScreen({super.key});
+  // These allow the Home screen to pass the selected cities and date
+  final String? initialOrigin;
+  final String? initialDestination;
+  final DateTime? initialDate;
+
+  const SearchRoutesScreen({
+    super.key,
+    this.initialOrigin,
+    this.initialDestination,
+    this.initialDate,
+  });
 
   @override
   State<SearchRoutesScreen> createState() => _SearchRoutesScreenState();
@@ -22,6 +32,23 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
   List<Map<String, dynamic>> trips = [];
   bool isLoading = false;
 
+  @override
+  void initState() {
+    super.initState();
+
+    // 1. Grab the data passed from the Passenger Home screen
+    fromCity = widget.initialOrigin;
+    toCity = widget.initialDestination;
+    selectedDate = widget.initialDate;
+
+    // 2. If the user already selected cities, auto-run the search!
+    if (fromCity != null && toCity != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        searchTrips();
+      });
+    }
+  }
+
   Future<void> pickDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -35,6 +62,61 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
         selectedDate = picked;
       });
     }
+  }
+
+  void _showCityPicker({required bool isOrigin}) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1E293B),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          height: 400,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isOrigin ? "Select Origin City" : "Select Destination City",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: ugandaCities.length,
+                  itemBuilder: (context, index) {
+                    final city = ugandaCities[index];
+                    return ListTile(
+                      leading: const Icon(Icons.location_city, color: Colors.white70),
+                      title: Text(
+                        city,
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      onTap: () {
+                        setState(() {
+                          if (isOrigin) {
+                            fromCity = city;
+                          } else {
+                            toCity = city;
+                          }
+                        });
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Future<void> searchTrips() async {
@@ -61,9 +143,11 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
     });
 
     try {
+      // 3. Pass the specific date to your updated TripService
       final results = await _tripService.searchTrips(
         origin: fromCity!,
         destination: toCity!,
+        date: selectedDate,
       );
 
       if (!mounted) return;
@@ -137,40 +221,88 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                 GlassPanel(
                   child: Column(
                     children: [
-                      DropdownMenu<String>(
-                        width: double.infinity,
-                        initialSelection: fromCity,
-                        label: const Text("From"),
-                        textStyle: const TextStyle(color: Colors.white),
-                        dropdownMenuEntries: ugandaCities
-                            .map((city) => DropdownMenuEntry(
-                                  value: city,
-                                  label: city,
-                                ))
-                            .toList(),
-                        onSelected: (value) {
-                          setState(() {
-                            fromCity = value;
-                          });
-                        },
+                      InkWell(
+                        onTap: () => _showCityPicker(isOrigin: true),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: .15),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.location_on_rounded,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "From",
+                                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                                  ),
+                                  Text(
+                                    fromCity ?? "Select Departure",
+                                    style: TextStyle(
+                                      color: fromCity != null ? Colors.white : Colors.white60,
+                                      fontSize: 16,
+                                      fontWeight: fromCity != null ? FontWeight.w600 : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
-                      DropdownMenu<String>(
-                        width: double.infinity,
-                        initialSelection: toCity,
-                        label: const Text("To"),
-                        textStyle: const TextStyle(color: Colors.white),
-                        dropdownMenuEntries: ugandaCities
-                            .map((city) => DropdownMenuEntry(
-                                  value: city,
-                                  label: city,
-                                ))
-                            .toList(),
-                        onSelected: (value) {
-                          setState(() {
-                            toCity = value;
-                          });
-                        },
+                      InkWell(
+                        onTap: () => _showCityPicker(isOrigin: false),
+                        borderRadius: BorderRadius.circular(14),
+                        child: Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .06),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: .15),
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.flag_rounded,
+                                color: Colors.white70,
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "To",
+                                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                                  ),
+                                  Text(
+                                    toCity ?? "Select Destination",
+                                    style: TextStyle(
+                                      color: toCity != null ? Colors.white : Colors.white60,
+                                      fontSize: 16,
+                                      fontWeight: toCity != null ? FontWeight.w600 : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                       const SizedBox(height: 16),
                       InkWell(
@@ -193,14 +325,24 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                                 color: Colors.white70,
                               ),
                               const SizedBox(width: 12),
-                              Text(
-                                selectedDate == null
-                                    ? "Select Departure Date"
-                                    : DateFormat("dd MMM yyyy")
-                                        .format(selectedDate!),
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    "Departure Date",
+                                    style: TextStyle(color: Colors.white54, fontSize: 12),
+                                  ),
+                                  Text(
+                                    selectedDate == null
+                                        ? "Choose Date"
+                                        : DateFormat("dd MMM yyyy").format(selectedDate!),
+                                    style: TextStyle(
+                                      color: selectedDate != null ? Colors.white : Colors.white60,
+                                      fontSize: 16,
+                                      fontWeight: selectedDate != null ? FontWeight.w600 : FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -226,8 +368,9 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                   const Expanded(
                     child: Center(
                       child: Text(
-                        "Search for buses to see available trips.",
+                        "No trips found for this route and date.",
                         textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.white70),
                       ),
                     ),
                   )
@@ -250,7 +393,7 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                             ),
                             subtitle: Text(
                               "${trip['routes']['origin']} → ${trip['routes']['destination']}\n"
-                              "${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(trip['departure_time']))}",
+                                  "${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(trip['departure_time']))}",
                             ),
                             trailing: Text(
                               "UGX ${trip['routes']['base_fare']}",
