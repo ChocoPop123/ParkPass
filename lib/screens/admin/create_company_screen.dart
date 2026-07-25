@@ -20,7 +20,7 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
 
   bool _isLoading = false;
   String? _errorMessage;
-  bool? _usernameAvailable; // null = not checked yet / invalid format
+  bool? _usernameAvailable;
 
   @override
   void initState() {
@@ -84,6 +84,7 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       body: AuthBackground(
         child: Center(
@@ -94,11 +95,11 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text('Register Your Company',
-                      style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+                  Text('Register Your Company',
+                      style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 6),
                   Text('Before you can approve conductors and manage routes, register your bus company.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 13)),
+                      style: TextStyle(color: colors.textSecondary, fontSize: 13)),
                   const SizedBox(height: 24),
                   const AuthFieldLabel('COMPANY NAME'),
                   const SizedBox(height: 8),
@@ -113,15 +114,14 @@ class _CreateCompanyScreenState extends State<CreateCompanyScreen> {
                         ? null
                         : Icon(
                       _usernameAvailable! ? Icons.check_circle : Icons.cancel,
-                      color: _usernameAvailable! ? kAuthAccentGreen : const Color(0xFFFF6B81),
+                      color: _usernameAvailable! ? colors.accent : colors.danger,
                       size: 18,
                     ),
                   ),
                   if (_usernameAvailable == false)
                     Padding(
                       padding: const EdgeInsets.only(top: 6),
-                      child: Text('Already taken.',
-                          style: TextStyle(color: const Color(0xFFFF6B81), fontSize: 11)),
+                      child: Text('Already taken.', style: TextStyle(color: colors.danger, fontSize: 11)),
                     ),
                   const SizedBox(height: 16),
                   const AuthFieldLabel('REGISTRATION NUMBER'),

@@ -6,7 +6,6 @@ import '../../models/company_model.dart';
 import '../../services/company_service.dart';
 import '../../main.dart';
 
-
 class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
 
@@ -84,7 +83,6 @@ class _SignupScreenState extends State<SignupScreen> {
         companyId: _selectedRole == 'conductor' ? _selectedCompany!.id : null,
       );
 
-
       if (mounted) {
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const AuthGate()),
@@ -106,6 +104,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: AuthBackground(
@@ -119,24 +118,17 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Center(
+                    Center(
                       child: Text(
                         'Create Account',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: TextStyle(color: colors.textPrimary, fontSize: 26, fontWeight: FontWeight.w700),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Center(
                       child: Text(
                         'Sign up to get started',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: colors.textSecondary, fontSize: 14),
                       ),
                     ),
                     const SizedBox(height: 28),
@@ -176,7 +168,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     const SizedBox(height: 8),
                     GlassTextField(
                       controller: _passwordController,
-                      hint: '••••••',
+                      hint: '\u2022\u2022\u2022\u2022\u2022\u2022',
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -189,14 +181,11 @@ class _SignupScreenState extends State<SignupScreen> {
                       },
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: colors.textSecondary,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -215,38 +204,25 @@ class _SignupScreenState extends State<SignupScreen> {
                       const AuthFieldLabel('COMPANY'),
                       const SizedBox(height: 8),
                       _isLoadingCompanies
-                          ? const Center(
-                        child: CircularProgressIndicator(color: kAuthAccentMint),
-                      )
+                          ? Center(child: CircularProgressIndicator(color: colors.accent))
                           : _companies.isEmpty
                           ? Text(
-                        'No companies registered yet — ask a company admin to sign up first.',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.5),
-                          fontSize: 12,
-                        ),
+                        'No companies registered yet \u2014 ask a company admin to sign up first.',
+                        style: TextStyle(color: colors.textSecondary, fontSize: 12),
                       )
                           : Container(
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.18),
-                          ),
+                          border: Border.all(color: colors.neutralBorder),
                         ),
                         padding: const EdgeInsets.symmetric(horizontal: 12),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton<CompanyModel>(
                             isExpanded: true,
-                            dropdownColor: const Color(0xFF17242A),
+                            dropdownColor: colors.surface,
                             value: _selectedCompany,
-                            hint: Text(
-                              'Select a company',
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.4),
-                              ),
-                            ),
-                            style: const TextStyle(color: Colors.white),
+                            hint: Text('Select a company', style: TextStyle(color: colors.textSecondary)),
+                            style: TextStyle(color: colors.textPrimary),
                             items: _companies.map((c) {
                               return DropdownMenuItem(
                                 value: c,
@@ -254,9 +230,11 @@ class _SignupScreenState extends State<SignupScreen> {
                                   children: [
                                     CircleAvatar(
                                       radius: 12,
-                                      backgroundColor: Colors.white.withOpacity(0.1),
+                                      backgroundColor: colors.surface,
                                       backgroundImage: c.logoUrl != null ? NetworkImage(c.logoUrl!) : null,
-                                      child: c.logoUrl == null ? const Icon(Icons.directions_bus, color: Colors.white54, size: 12) : null,
+                                      child: c.logoUrl == null
+                                          ? Icon(Icons.directions_bus, color: colors.textSecondary, size: 12)
+                                          : null,
                                     ),
                                     const SizedBox(width: 10),
                                     Column(
@@ -267,7 +245,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         if (c.username != null)
                                           Text(
                                             '@${c.username}',
-                                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                                            style: TextStyle(color: colors.textSecondary, fontSize: 10),
                                           ),
                                       ],
                                     ),
@@ -275,8 +253,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                 ),
                               );
                             }).toList(),
-                            onChanged: (value) =>
-                                setState(() => _selectedCompany = value),
+                            onChanged: (value) => setState(() => _selectedCompany = value),
                           ),
                         ),
                       ),
@@ -303,7 +280,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         },
                         child: Text(
                           'Already have an account? Log in',
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                          style: TextStyle(color: colors.textSecondary),
                         ),
                       ),
                     ),

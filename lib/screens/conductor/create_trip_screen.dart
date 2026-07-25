@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../../models/route_model.dart';
+import '../../models/trip_model.dart';
 import '../../services/trip_service.dart';
 import '../../widgets/glass_widgets.dart';
-import '../../models/trip_model.dart';
 
 class CreateTripScreen extends StatefulWidget {
   final TripModel? existingTrip;
@@ -14,18 +15,12 @@ class CreateTripScreen extends StatefulWidget {
 
 class _CreateTripScreenState extends State<CreateTripScreen> {
   final _tripService = TripService();
-  final _seatCountController = TextEditingController(text: '14');
-  final _maxCargoController = TextEditingController(text: '100');
-  final _plateController = TextEditingController();
-  final _colorController = TextEditingController();
-  final _driverNameController = TextEditingController();
-  final _driverContactController = TextEditingController();
-  final _fareOverrideController = TextEditingController();
+  late final TextEditingController _seatCountController;
+  late final TextEditingController _maxCargoController;
 
   List<RouteModel> _routes = [];
   RouteModel? _selectedRoute;
   DateTime? _selectedDateTime;
-  String _busClass = 'Ordinary';
   bool _isLoading = false;
   bool _isLoadingRoutes = true;
   String? _errorMessage;
@@ -33,63 +28,57 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
   @override
   void initState() {
     super.initState();
-    if (widget.existingTrip != null) {
-      final t = widget.existingTrip!;
-      _seatCountController.text = t.vehicleSeatCount.toString();
-      _maxCargoController.text = t.maxCargoKg.toString();
-      _plateController.text = t.busNumberPlate ?? '';
-      _colorController.text = t.busColor ?? '';
-      _driverNameController.text = t.driverName ?? '';
-      _driverContactController.text = t.driverContact ?? '';
-      _fareOverrideController.text = t.fareOverride?.toString() ?? '';
-      _busClass = t.busClass;
-      _selectedDateTime = t.departureTime;
-    }
+    _seatCountController = TextEditingController(
+        text: widget.existingTrip?.vehicleSeatCount.toString() ?? '14');
+    _maxCargoController = TextEditingController(
+        text: widget.existingTrip?.maxCargoKg.toString() ?? '100');
+    _selectedDateTime = widget.existingTrip?.departureTime;
+
     _loadRoutes();
   }
 
+  @override
+  void dispose() {
+    _seatCountController.dispose();
+    _maxCargoController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadRoutes() async {
-    try {
-      final routes = await _tripService.getAllRoutes();
+    final routes = await _tripService.getAllRoutes();
+    setState(() {
+      _routes = routes;
+      _isLoadingRoutes = false;
 
-      // Manual lookup instead of firstOrNull, so we don't need package:collection.
-      RouteModel? matchedRoute;
       if (widget.existingTrip != null) {
-        for (final r in routes) {
-          if (r.id == widget.existingTrip!.routeId) {
-            matchedRoute = r;
-            break;
-          }
-        }
+        try {
+          _selectedRoute = routes.firstWhere(
+              (r) => r.id == widget.existingTrip!.routeId);
+        } catch (_) {}
       }
-
-      setState(() {
-        _routes = routes;
-        _isLoadingRoutes = false;
-        _selectedRoute = matchedRoute;
-      });
-    } catch (e) {
-      setState(() {
-        _isLoadingRoutes = false;
-        _errorMessage = 'Could not load routes: $e';
-      });
-    }
+    });
   }
 
   Future<void> _pickDateTime() async {
+    final initialDate = _selectedDateTime ?? DateTime.now();
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
+      initialDate: initialDate.isBefore(DateTime.now()) ? DateTime.now() : initialDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 30)), // Allow some buffer for historical edits if needed
       lastDate: DateTime.now().add(const Duration(days: 90)),
     );
     if (date == null || !mounted) return;
 
-    final time = await showTimePicker(context: context, initialTime: TimeOfDay.now());
+    final time = await showTimePicker(
+      context: context,
+      initialTime: TimeOfDay.fromDateTime(initialDate),
+    );
     if (time == null) return;
 
     setState(() {
-      _selectedDateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+      _selectedDateTime = DateTime(
+        date.year, date.month, date.day, time.hour, time.minute,
+      );
     });
   }
 
@@ -112,14 +101,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           departureTime: _selectedDateTime!,
           seatCount: int.parse(_seatCountController.text.trim()),
           maxCargoKg: double.parse(_maxCargoController.text.trim()),
-          busNumberPlate: _plateController.text.trim().isEmpty ? null : _plateController.text.trim(),
-          busColor: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
-          busClass: _busClass,
-          driverName: _driverNameController.text.trim().isEmpty ? null : _driverNameController.text.trim(),
-          driverContact: _driverContactController.text.trim().isEmpty ? null : _driverContactController.text.trim(),
-          fareOverride: _fareOverrideController.text.trim().isEmpty
-              ? null
-              : double.parse(_fareOverrideController.text.trim()),
         );
       } else {
         await _tripService.createTrip(
@@ -127,14 +108,6 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
           departureTime: _selectedDateTime!,
           seatCount: int.parse(_seatCountController.text.trim()),
           maxCargoKg: double.parse(_maxCargoController.text.trim()),
-          busNumberPlate: _plateController.text.trim().isEmpty ? null : _plateController.text.trim(),
-          busColor: _colorController.text.trim().isEmpty ? null : _colorController.text.trim(),
-          busClass: _busClass,
-          driverName: _driverNameController.text.trim().isEmpty ? null : _driverNameController.text.trim(),
-          driverContact: _driverContactController.text.trim().isEmpty ? null : _driverContactController.text.trim(),
-          fareOverride: _fareOverrideController.text.trim().isEmpty
-              ? null
-              : double.parse(_fareOverrideController.text.trim()),
         );
       }
       if (mounted) Navigator.pop(context, true);
@@ -145,176 +118,128 @@ class _CreateTripScreenState extends State<CreateTripScreen> {
     }
   }
 
-  Widget _classTab(String value) {
-    final isSelected = _busClass == value;
-    return Expanded(
-      child: GestureDetector(
-        onTap: () => setState(() => _busClass = value),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 10),
-          decoration: BoxDecoration(
-            color: isSelected ? kAuthAccentBlue : Colors.transparent,
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.white.withOpacity(0.18)),
-          ),
-          child: Text(
-            value,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: isSelected ? Colors.white : Colors.white.withOpacity(0.6),
-              fontWeight: FontWeight.w600,
-              fontSize: 12,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    final isEditing = widget.existingTrip != null;
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: AuthBackground(
-        child: _isLoadingRoutes
-            ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
-            : SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                  Text(
-                    widget.existingTrip != null ? 'Edit Trip' : 'Schedule a Trip',
-                    style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              GlassPanel(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  mainAxisSize: MainAxisSize.min,
+        child: SafeArea(
+          child: _isLoadingRoutes
+              ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+              : SingleChildScrollView(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    const AuthFieldLabel('ROUTE'),
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: Colors.white.withOpacity(0.18)),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<RouteModel>(
-                          isExpanded: true,
-                          dropdownColor: const Color(0xFF17242A),
-                          value: _selectedRoute,
-                          hint: Text('Select a route', style: TextStyle(color: Colors.white.withOpacity(0.4))),
-                          style: const TextStyle(color: Colors.white),
-                          items: _routes.map((route) {
-                            return DropdownMenuItem(
-                              value: route,
-                              child: Text('${route.origin} → ${route.destination}'),
-                            );
-                          }).toList(),
-                          onChanged: (value) => setState(() => _selectedRoute = value),
-                        ),
-                      ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
                     ),
-                    const SizedBox(height: 18),
-
-                    const AuthFieldLabel('NUMBER OF SEATS'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _seatCountController, hint: '14', keyboardType: TextInputType.number),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('MAX CARGO CAPACITY (KG)'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _maxCargoController, hint: '100', keyboardType: TextInputType.number),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('BUS NUMBER PLATE'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _plateController, hint: 'e.g. UBH 123X'),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('BUS COLOR'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _colorController, hint: 'e.g. White with blue stripe'),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('BUS CLASS'),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        _classTab('Ordinary'),
-                        const SizedBox(width: 8),
-                        _classTab('Executive'),
-                        const SizedBox(width: 8),
-                        _classTab('VIP'),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('DRIVER NAME'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _driverNameController, hint: 'e.g. Moses Okello'),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('DRIVER CONTACT'),
-                    const SizedBox(height: 8),
-                    GlassTextField(controller: _driverContactController, hint: '+256...', keyboardType: TextInputType.phone),
-                    const SizedBox(height: 16),
-
-                    const AuthFieldLabel('FARE OVERRIDE (OPTIONAL)'),
-                    const SizedBox(height: 8),
-                    GlassTextField(
-                      controller: _fareOverrideController,
-                      hint: 'Leave blank to use the route\'s base fare',
-                      keyboardType: TextInputType.number,
-                    ),
-                    const SizedBox(height: 16),
-
-                    GestureDetector(
-                      onTap: _pickDateTime,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
-                          borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.18)),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.calendar_today, color: kAuthAccentMint, size: 18),
-                            const SizedBox(width: 10),
-                            Text(
-                              _selectedDateTime == null
-                                  ? 'Pick departure date & time'
-                                  : _selectedDateTime.toString(),
-                              style: const TextStyle(color: Colors.white, fontSize: 13),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-
-                    if (_errorMessage != null) AuthErrorText(_errorMessage!),
-                    GlassGradientButton(
-                      label: widget.existingTrip != null ? 'Save Changes' : 'Create Trip',
-                      isLoading: _isLoading,
-                      onTap: _handleCreate,
-                    ),
+                    const Spacer(),
                   ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 12),
+                Text(
+                  isEditing ? "Update Trip" : "Schedule Trip",
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  isEditing ? "Update journey details" : "Create a new journey for passengers",
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 15,
+                  ),
+                ),
+                const SizedBox(height: 30),
+                const AuthFieldLabel('ROUTE'),
+                const SizedBox(height: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<RouteModel>(
+                      isExpanded: true,
+                      dropdownColor: const Color(0xFF17242A),
+                      value: _selectedRoute,
+                      hint: Text(
+                        'Select a route',
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                      ),
+                      style: const TextStyle(color: Colors.white),
+                      items: _routes.map((route) {
+                        return DropdownMenuItem(
+                          value: route,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "${route.origin} → ${route.destination}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                "UGX ${route.baseFare.toStringAsFixed(0)}",
+                                style: const TextStyle(
+                                  color: Colors.grey,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (value) => setState(() => _selectedRoute = value),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('NUMBER OF SEATS'),
+                const SizedBox(height: 8),
+                GlassTextField(
+                  controller: _seatCountController,
+                  hint: '14',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('MAX CARGO CAPACITY (KG)'),
+                const SizedBox(height: 8),
+                GlassTextField(
+                  controller: _maxCargoController,
+                  hint: '100',
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 20),
+                const AuthFieldLabel('DEPARTURE TIME'),
+                const SizedBox(height: 8),
+                GlassSelectorChip(
+                  icon: Icons.calendar_today,
+                  label: _selectedDateTime == null
+                      ? 'Pick departure date & time'
+                      : DateFormat('dd MMM yyyy, hh:mm a').format(_selectedDateTime!),
+                  onTap: _pickDateTime,
+                ),
+                const SizedBox(height: 32),
+                if (_errorMessage != null) AuthErrorText(_errorMessage!),
+                GlassGradientButton(
+                  label: isEditing ? 'Update Trip' : 'Create Trip',
+                  isLoading: _isLoading,
+                  onTap: _handleCreate,
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -127,7 +127,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         context,
                         MaterialPageRoute(builder: (_) => CreateTripScreen(existingTrip: _trip)),
                       );
-                      if (changed == true && mounted) Navigator.pop(context, true);
+                      if (changed == true && mounted) {
+                        Navigator.pop(context, true);
+                      }
                     },
                   ),
                   IconButton(

@@ -143,4 +143,49 @@ class TripService {
         .eq('routes.company_id', companyId);
     return (data as List).length;
   }
+
+  // Fetches trips matching the selected route and optional date criteria,
+  // ensuring users only see future departures even for today's date.
+  Future<List<Map<String, dynamic>>> searchTrips({
+    required String origin,
+    required String destination,
+    DateTime? date,
+  }) async {
+    var query = supabase
+        .from('trips')
+        .select('''
+          *,
+          routes!inner(
+            origin,
+            destination,
+            base_fare
+          )
+        ''')
+        .eq('routes.origin', origin)
+        .eq('routes.destination', destination);
+
+    if (date != null) {
+      final now = DateTime.now();
+
+      // If the selected date is today, start searching from right NOW.
+      // Otherwise, start from 00:00 of the selected date.
+      final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+      final startSearchTime = isToday
+          ? now.toIso8601String()
+          : DateTime(date.year, date.month, date.day).toIso8601String();
+
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59).toIso8601String();
+
+      query = query
+          .gte('departure_time', startSearchTime)
+          .lte('departure_time', endOfDay);
+    } else {
+      final now = DateTime.now().toIso8601String();
+      query = query.gte('departure_time', now);
+    }
+
+    final data = await query.order('departure_time');
+
+    return List<Map<String, dynamic>>.from(data as List);
+  }
 }
