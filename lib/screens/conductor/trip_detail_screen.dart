@@ -52,20 +52,18 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
   }
 
   Future<void> _confirmDelete() async {
+    final colors = AppColors.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        backgroundColor: const Color(0xFF17242A),
-        title: const Text('Delete this trip?', style: TextStyle(color: Colors.white)),
-        content: const Text(
-          'This cannot be undone.',
-          style: TextStyle(color: Colors.white70),
-        ),
+        backgroundColor: colors.surface,
+        title: Text('Delete this trip?', style: TextStyle(color: colors.textPrimary)),
+        content: Text('This cannot be undone.', style: TextStyle(color: colors.textSecondary)),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: Color(0xFFFF6B81))),
+            child: Text('Delete', style: TextStyle(color: colors.danger)),
           ),
         ],
       ),
@@ -77,7 +75,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
     }
   }
 
-  Widget _statusChip(String label, String value) {
+  Widget _statusChip(String label, String value, AppColors colors) {
     final isActive = _trip.status == value;
     return GestureDetector(
       onTap: () => _setStatus(value),
@@ -85,19 +83,24 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? kAuthAccentBlue : Colors.white.withOpacity(0.08),
+          color: isActive ? colors.accent : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.18)),
+          border: Border.all(color: colors.border),
         ),
-        child: Text(label, style: TextStyle(color: isActive ? Colors.white : Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
+        child: Text(label,
+            style: TextStyle(
+                color: isActive ? colors.buttonText : colors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final routeLabel = _trip.routeOrigin != null
-        ? '${_trip.routeOrigin} → ${_trip.routeDestination}'
+        ? '${_trip.routeOrigin} \u2192 ${_trip.routeDestination}'
         : 'Trip';
 
     return Scaffold(
@@ -110,15 +113,15 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                    icon: Icon(Icons.arrow_back, color: colors.textSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
                     child: Text(routeLabel,
-                        style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w700)),
+                        style: TextStyle(color: colors.textPrimary, fontSize: 18, fontWeight: FontWeight.w700)),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.white70),
+                    icon: Icon(Icons.edit, color: colors.textSecondary),
                     onPressed: () async {
                       final changed = await Navigator.push(
                         context,
@@ -128,7 +131,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     },
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, color: Color(0xFFFF6B81)),
+                    icon: Icon(Icons.delete_outline, color: colors.danger),
                     onPressed: _confirmDelete,
                   ),
                 ],
@@ -138,81 +141,81 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${_trip.departureTime.toString().substring(0, 16)} · ${_trip.busClass}',
-                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                    Text('${_trip.departureTime.toString().substring(0, 16)} \u00b7 ${_trip.busClass}',
+                        style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Text(
-                      '${_trip.busNumberPlate ?? "No plate set"} · ${_trip.busColor ?? "No color set"}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      '${_trip.busNumberPlate ?? "No plate set"} \u00b7 ${_trip.busColor ?? "No color set"}',
+                      style: TextStyle(color: colors.textSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Driver: ${_trip.driverName ?? "—"} · ${_trip.driverContact ?? "—"}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      'Driver: ${_trip.driverName ?? "\u2014"} \u00b7 ${_trip.driverContact ?? "\u2014"}',
+                      style: TextStyle(color: colors.textSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Fare: UGX ${_trip.effectiveFare.toStringAsFixed(0)} · Seats: ${_trip.vehicleSeatCount} · Cargo left: ${_trip.remainingCargoKg}kg',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      'Fare: UGX ${_trip.effectiveFare.toStringAsFixed(0)} \u00b7 Seats: ${_trip.vehicleSeatCount} \u00b7 Cargo left: ${_trip.remainingCargoKg}kg',
+                      style: TextStyle(color: colors.textSecondary, fontSize: 12),
                     ),
                     const SizedBox(height: 16),
-                    Text('STATUS', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1)),
+                    Text('STATUS', style: TextStyle(color: colors.textSecondary, fontSize: 11, letterSpacing: 1)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        _statusChip('Scheduled', 'scheduled'),
-                        _statusChip('Delayed', 'delayed'),
-                        _statusChip('Cancelled', 'cancelled'),
-                        _statusChip('Departed', 'departed'),
+                        _statusChip('Scheduled', 'scheduled', colors),
+                        _statusChip('Delayed', 'delayed', colors),
+                        _statusChip('Cancelled', 'cancelled', colors),
+                        _statusChip('Departed', 'departed', colors),
                       ],
                     ),
                     if (_trip.isPastDeparture && _trip.status == 'scheduled') ...[
                       const SizedBox(height: 8),
                       Text('Auto-marked as departed (5+ min past departure time)',
-                          style: TextStyle(color: kAuthAccentMint.withOpacity(0.8), fontSize: 11)),
+                          style: TextStyle(color: colors.accent, fontSize: 11)),
                     ],
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              Text('PASSENGER MANIFEST', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, letterSpacing: 1)),
+              Text('PASSENGER MANIFEST', style: TextStyle(color: colors.textSecondary, fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               GlassPanel(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                    ? Center(child: CircularProgressIndicator(color: colors.accent))
                     : _manifest.isEmpty
-                    ? Text('No bookings yet.', style: TextStyle(color: Colors.white.withOpacity(0.5)))
+                    ? Text('No bookings yet.', style: TextStyle(color: colors.textSecondary))
                     : Column(
                   children: _manifest.map((b) {
                     return GlassListRow(
                       icon: b.checkedIn ? Icons.check_circle : Icons.person_outline,
                       title: b.passengerName ?? 'Passenger',
-                      subtitle: 'Seat ${b.seatNumber ?? "?"} · ${b.paymentStatus}${b.checkedIn ? " · Checked in" : ""}',
+                      subtitle: 'Seat ${b.seatNumber ?? "?"} \u00b7 ${b.paymentStatus}${b.checkedIn ? " \u00b7 Checked in" : ""}',
                     );
                   }).toList(),
                 ),
               ),
               const SizedBox(height: 16),
-              Text('CARGO BOOKINGS', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, letterSpacing: 1)),
+              Text('CARGO BOOKINGS', style: TextStyle(color: colors.textSecondary, fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               GlassPanel(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                    ? Center(child: CircularProgressIndicator(color: colors.accent))
                     : _cargo.isEmpty
-                    ? Text('No cargo bookings yet.', style: TextStyle(color: Colors.white.withOpacity(0.5)))
+                    ? Text('No cargo bookings yet.', style: TextStyle(color: colors.textSecondary))
                     : Column(
                   children: _cargo.map((c) {
                     return GlassListRow(
                       icon: Icons.inventory_2_outlined,
                       title: c.ownerName ?? 'Cargo owner',
-                      subtitle: '${c.weightKg}kg · UGX ${c.price.toStringAsFixed(0)} · ${c.status}',
+                      subtitle: '${c.weightKg}kg \u00b7 UGX ${c.price.toStringAsFixed(0)} \u00b7 ${c.status}',
                       trailing: c.status == 'pending'
                           ? Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           GlassIconAction(
                             icon: Icons.check,
-                            color: kAuthAccentGreen,
+                            color: colors.accent,
                             onTap: () async {
                               await _cargoService.setCargoStatus(c.id, 'verified');
                               _load();
@@ -220,7 +223,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                           ),
                           GlassIconAction(
                             icon: Icons.close,
-                            color: const Color(0xFFFF6B81),
+                            color: colors.danger,
                             onTap: () async {
                               await _cargoService.setCargoStatus(c.id, 'rejected');
                               _load();

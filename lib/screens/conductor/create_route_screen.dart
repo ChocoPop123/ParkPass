@@ -61,6 +61,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       body: AuthBackground(
         child: SingleChildScrollView(
@@ -71,11 +72,11 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white70),
+                    icon: Icon(Icons.arrow_back, color: colors.textSecondary),
                     onPressed: () => Navigator.pop(context),
                   ),
-                  const Text('Create Route',
-                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text('Create Route',
+                      style: TextStyle(color: colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
                 ],
               ),
               const SizedBox(height: 16),

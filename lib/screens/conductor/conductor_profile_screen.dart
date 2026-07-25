@@ -91,6 +91,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
@@ -99,9 +100,9 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Profile', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+              Text('Profile', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
               IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white70),
+                icon: Icon(Icons.logout, color: colors.textSecondary),
                 onPressed: () => Supabase.instance.client.auth.signOut(),
               ),
             ],
@@ -110,7 +111,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
           Expanded(
             child: GlassPanel(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -123,18 +124,18 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                           children: [
                             CircleAvatar(
                               radius: 44,
-                              backgroundColor: Colors.white.withOpacity(0.1),
+                              backgroundColor: colors.surface,
                               backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
                               child: _isUploadingAvatar
-                                  ? const CircularProgressIndicator(color: kAuthAccentMint)
+                                  ? CircularProgressIndicator(color: colors.accent)
                                   : (_avatarUrl == null
-                                  ? const Icon(Icons.person, color: Colors.white54, size: 40)
+                                  ? Icon(Icons.person, color: colors.textSecondary, size: 40)
                                   : null),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(color: kAuthAccentBlue, shape: BoxShape.circle),
-                              child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                              decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle),
+                              child: Icon(Icons.camera_alt, color: colors.buttonText, size: 14),
                             ),
                           ],
                         ),
@@ -143,11 +144,11 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                     const SizedBox(height: 20),
                     const AuthFieldLabel('EMAIL'),
                     const SizedBox(height: 6),
-                    Text(_email ?? '—', style: const TextStyle(color: Colors.white70)),
+                    Text(_email ?? '\u2014', style: TextStyle(color: colors.textSecondary)),
                     const SizedBox(height: 16),
                     const AuthFieldLabel('COMPANY'),
                     const SizedBox(height: 6),
-                    Text(_companyName ?? '—', style: const TextStyle(color: Colors.white70)),
+                    Text(_companyName ?? '\u2014', style: TextStyle(color: colors.textSecondary)),
                     const SizedBox(height: 18),
                     const AuthFieldLabel('FULL NAME'),
                     const SizedBox(height: 8),
@@ -160,7 +161,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                     if (_message != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(_message!, style: TextStyle(color: kAuthAccentMint.withOpacity(0.9))),
+                        child: Text(_message!, style: TextStyle(color: colors.accent)),
                       ),
                     GlassGradientButton(label: 'Save', isLoading: _isSaving, onTap: _save),
                   ],

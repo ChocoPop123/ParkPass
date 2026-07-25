@@ -4,6 +4,7 @@ import 'services/auth_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/passenger/passenger_home.dart';
 import 'theme/app_theme.dart';
+import 'theme/theme_mode_controller.dart';
 import 'screens/admin/create_company_screen.dart';
 import 'screens/conductor/conductor_shell.dart';
 import 'screens/conductor/pending_approval_screen.dart';
@@ -18,6 +19,8 @@ Future<void> main() async {
     publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
   );
 
+  await ThemeModeController.instance.load();
+
   runApp(const ParkPassApp());
 }
 
@@ -26,10 +29,24 @@ class ParkPassApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'ParkPass',
-      theme: AppTheme.lightTheme,
-      home: const AuthGate(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: ThemeModeController.instance,
+      builder: (context, mode, _) {
+        return MaterialApp(
+          title: 'ParkPass',
+          theme: AppTheme.lightTheme,
+          darkTheme: ThemeData(
+            brightness: Brightness.dark,
+            scaffoldBackgroundColor: const Color(0xFF0B0B0F),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF3B82F6),
+              brightness: Brightness.dark,
+            ),
+          ),
+          themeMode: mode,
+          home: const AuthGate(),
+        );
+      },
     );
   }
 }

@@ -1,103 +1,139 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 
-/// Shared glassmorphic building blocks for the auth flow (login/signup).
-/// Keeping these in one file means both screens stay visually in sync —
-/// change a color or radius here and it updates everywhere.
+/// ============================================================
+/// FINAL THEME — flat, bordered "outline glass" in a single blue
+/// accent. No green, no blur, no shadows. Light/dark are mirror
+/// images of each other (black<->white swap) with blue held constant.
+///
+/// Reads Theme.of(context).brightness, so wire light/dark by
+/// setting MaterialApp's theme/darkTheme/themeMode as usual —
+/// these widgets follow automatically, no extra plumbing needed.
+/// ============================================================
 
+class AppColors {
+  final Color background;
+  final Color surface;
+  final Color border;
+  final Color neutralBorder;
+  final Color textPrimary;
+  final Color textSecondary;
+  final Color accent;
+  final Color avatarFill;
+  final Color avatarText;
+  final Color buttonText;
+  final Color danger;
+
+  const AppColors({
+    required this.background,
+    required this.surface,
+    required this.border,
+    required this.neutralBorder,
+    required this.textPrimary,
+    required this.textSecondary,
+    required this.accent,
+    required this.avatarFill,
+    required this.avatarText,
+    required this.buttonText,
+    required this.danger,
+  });
+
+  static AppColors of(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? dark : light;
+  }
+
+  static const light = AppColors(
+    background: Color(0xFFF2F2F3),
+    surface: Colors.white,
+    border: Color(0x552563EB),
+    neutralBorder: Color(0x1F0A0A0A),
+    textPrimary: Color(0xFF0A0A0A),
+    textSecondary: Color(0xA60A0A0A),
+    accent: Color(0xFF2563EB),
+    avatarFill: Color(0xFF0A0A0A),
+    avatarText: Colors.white,
+    buttonText: Colors.white,
+    danger: Color(0xFFDC2626),
+  );
+
+  static const dark = AppColors(
+    background: Color(0xFF000814),
+    surface: Color(0xFF000814),
+    border: Color(0x663B82F6),
+    neutralBorder: Color(0x1FFFFFFF),
+    textPrimary: Colors.white,
+    textSecondary: Color(0xA6FFFFFF),
+    accent: Color(0xFF3B82F6),
+    avatarFill: Colors.white,
+    avatarText: Color(0xFF0A0A0A),
+    buttonText: Colors.white,
+    danger: Color(0xFFEF4444),
+  );
+}
+
+@Deprecated('Use AppColors.of(context).accent')
+const kAuthAccentMint = Color(0xFF3B82F6);
+@Deprecated('Use AppColors.of(context).accent')
+const kAuthAccentGreen = Color(0xFF3B82F6);
+@Deprecated('Use AppColors.of(context).accent')
 const kAuthAccentBlue = Color(0xFF3B82F6);
+@Deprecated('Use AppColors.of(context).accent')
 const kAuthAccentSkyBlue = Color(0xFF2563EB);
-const kAuthAccentGreen = Color(0xFF34D399);
-const kAuthAccentMint = Color(0xFF6EE7B7);
 
-/// Full-bleed background with blurred blue/green orbs and a faint bus mark.
-/// Wrap your Scaffold body's Stack with this at the bottom layer.
 class AuthBackground extends StatelessWidget {
   final Widget child;
   const AuthBackground({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      fit: StackFit.expand,
-      children: [
-        // Lighter, cooler base than pure black — dark teal-navy instead of dark purple.
-        Container(color: const Color(0xFF0E1A1B)),
-        const _BackgroundBus(),
-        SafeArea(child: child),
-      ],
+    final colors = AppColors.of(context);
+    return Container(
+      color: colors.background,
+      child: SafeArea(child: child),
     );
   }
 }
 
-/// A soft, blurred bus silhouette sitting behind the card — a subtle
-/// nod to the app's domain without competing with the form.
-class _BackgroundBus extends StatelessWidget {
-  const _BackgroundBus();
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 90,
-      right: -40,
-      child: Transform.rotate(
-        angle: -0.12,
-        child: ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-          child: Opacity(
-            opacity: 0.22,
-            child: Icon(
-              Icons.directions_bus_filled_rounded,
-              size: 260,
-              color: kAuthAccentMint,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The frosted glass card that holds the form — lighter and greener
-/// than a standard dark glass panel.
 class GlassCard extends StatelessWidget {
   final Widget child;
   const GlassCard({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(28),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          width: 340,
-          padding: const EdgeInsets.fromLTRB(28, 36, 28, 28),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                kAuthAccentBlue.withOpacity(0.14),
-                kAuthAccentGreen.withOpacity(0.10),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.28),
-              width: 1.2,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.25),
-                blurRadius: 30,
-                offset: const Offset(0, 15),
-              ),
-            ],
-          ),
-          child: child,
-        ),
+    final colors = AppColors.of(context);
+    return Container(
+      width: 340,
+      padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
+      decoration: BoxDecoration(
+        color: colors.accent.withOpacity(0.06),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: colors.border, width: 1.3),
       ),
+      child: child,
+    );
+  }
+}
+
+class GlassPanel extends StatelessWidget {
+  final Widget child;
+  final EdgeInsetsGeometry padding;
+  const GlassPanel({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: colors.border, width: 1.2),
+      ),
+      child: child,
     );
   }
 }
@@ -108,19 +144,19 @@ class AuthFieldLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Text(
       text,
       style: TextStyle(
-        color: Colors.white.withOpacity(0.65),
+        color: colors.textSecondary,
         fontSize: 11,
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.8,
+        letterSpacing: 0.6,
       ),
     );
   }
 }
 
-/// Glass-styled text field. Pass a [validator] to plug into a Form if desired.
 class GlassTextField extends StatelessWidget {
   final TextEditingController controller;
   final String hint;
@@ -143,11 +179,13 @@ class GlassTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
+        color: isDark ? colors.surface.withOpacity(0.04) : colors.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        border: Border.all(color: colors.neutralBorder),
       ),
       child: TextFormField(
         controller: controller,
@@ -157,26 +195,23 @@ class GlassTextField extends StatelessWidget {
         autofillHints: null,
         enableSuggestions: false,
         autocorrect: false,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        cursorColor: kAuthAccentMint,
+        style: TextStyle(color: colors.textPrimary, fontSize: 14),
+        cursorColor: colors.accent,
         decoration: InputDecoration(
           filled: false,
           fillColor: Colors.transparent,
           hintText: hint,
-          hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+          hintStyle: TextStyle(color: colors.textSecondary.withOpacity(0.6)),
           border: InputBorder.none,
           errorBorder: InputBorder.none,
           focusedErrorBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          errorStyle: const TextStyle(
-            color: Color(0xFFFF6B81),
-            fontSize: 11,
-          ),
+          errorStyle: TextStyle(color: colors.danger, fontSize: 11),
           suffixIcon: suffixIcon ??
               (suffixDot
-                  ? const Padding(
-                padding: EdgeInsets.only(right: 16),
-                child: Icon(Icons.circle, color: kAuthAccentMint, size: 8),
+                  ? Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Icon(Icons.circle, color: colors.accent, size: 8),
               )
                   : null),
           suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
@@ -186,7 +221,6 @@ class GlassTextField extends StatelessWidget {
   }
 }
 
-/// Light glass-blue pill button with a built-in loading spinner state.
 class GlassGradientButton extends StatelessWidget {
   final String label;
   final bool isLoading;
@@ -201,6 +235,7 @@ class GlassGradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return GestureDetector(
       onTap: isLoading ? null : onTap,
       child: Container(
@@ -208,19 +243,7 @@ class GlassGradientButton extends StatelessWidget {
         height: 52,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(14),
-          gradient: const LinearGradient(
-            colors: [kAuthAccentBlue, kAuthAccentSkyBlue],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-          ),
-          border: Border.all(color: Colors.white.withOpacity(0.35), width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: kAuthAccentSkyBlue.withOpacity(0.45),
-              blurRadius: 22,
-              offset: const Offset(0, 8),
-            ),
-          ],
+          color: colors.accent,
         ),
         alignment: Alignment.center,
         child: isLoading
@@ -234,8 +257,8 @@ class GlassGradientButton extends StatelessWidget {
         )
             : Text(
           label,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.buttonText,
             fontSize: 15,
             fontWeight: FontWeight.w600,
           ),
@@ -245,36 +268,35 @@ class GlassGradientButton extends StatelessWidget {
   }
 }
 
-/// Inline error banner, styled to fit the glass theme.
 class AuthErrorText extends StatelessWidget {
   final String message;
   const AuthErrorText(this.message, {super.key});
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFFF6B81).withOpacity(0.12),
+          color: colors.danger.withOpacity(0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFFF6B81).withOpacity(0.3)),
+          border: Border.all(color: colors.danger.withOpacity(0.35)),
         ),
         child: Text(
           message,
-          style: const TextStyle(color: Color(0xFFFF6B81), fontSize: 12.5),
+          style: TextStyle(color: colors.danger, fontSize: 12.5),
         ),
       ),
     );
   }
 }
 
-/// "Passenger / Conductor" style segmented role selector for signup.
 class RoleToggle extends StatelessWidget {
-  final List<String> roles; // e.g. ['passenger', 'conductor']
-  final List<String> labels; // e.g. ['Passenger', 'Conductor']
+  final List<String> roles;
+  final List<String> labels;
   final String selected;
   final ValueChanged<String> onChanged;
 
@@ -288,11 +310,11 @@ class RoleToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withOpacity(0.18)),
+        border: Border.all(color: colors.border),
       ),
       padding: const EdgeInsets.all(4),
       child: Row(
@@ -306,17 +328,13 @@ class RoleToggle extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(10),
-                  gradient: isSelected
-                      ? const LinearGradient(
-                    colors: [kAuthAccentBlue, kAuthAccentSkyBlue],
-                  )
-                      : null,
+                  color: isSelected ? colors.accent : Colors.transparent,
                 ),
                 alignment: Alignment.center,
                 child: Text(
                   labels[i],
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white.withOpacity(0.55),
+                    color: isSelected ? colors.buttonText : colors.textSecondary,
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
@@ -330,99 +348,6 @@ class RoleToggle extends StatelessWidget {
   }
 }
 
-
-
-
-/// A full-width glass panel for dashboard content (unlike GlassCard,
-/// which is a fixed-width auth form card).
-class GlassPanel extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry padding;
-  final double borderRadius;
-
-  const GlassPanel({
-    super.key,
-    required this.child,
-    this.padding = const EdgeInsets.all(20),
-    this.borderRadius = 24,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          width: double.infinity,
-          padding: padding,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                kAuthAccentBlue.withOpacity(0.14),
-                kAuthAccentGreen.withOpacity(0.10),
-              ],
-            ),
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(color: Colors.white.withOpacity(0.28), width: 1.2),
-            boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.25), blurRadius: 30, offset: const Offset(0, 15)),
-            ],
-          ),
-          child: child,
-        ),
-      ),
-    );
-  }
-}
-
-/// A tappable glass "chip" row — used for things like the passenger's
-/// company selector at the top of their dashboard.
-class GlassSelectorChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  const GlassSelectorChip({
-    super.key,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.08),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.18)),
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: kAuthAccentMint, size: 20),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                label,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
-              ),
-            ),
-            Icon(Icons.unfold_more, color: Colors.white.withOpacity(0.4)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// A glass-styled list row — for pending conductor requests, company
-/// lists, trip lists, etc. Optional trailing widget for actions.
 class GlassListRow extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -441,29 +366,36 @@ class GlassListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.14)),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           children: [
-            Icon(icon, color: kAuthAccentGreen, size: 20),
+            Icon(icon, color: colors.accent, size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: colors.textPrimary,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13.5,
+                    ),
+                  ),
                   if (subtitle != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(subtitle!, style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                    Text(
+                      subtitle!,
+                      style: TextStyle(color: colors.textSecondary, fontSize: 11.5),
                     ),
                 ],
               ),
@@ -476,28 +408,72 @@ class GlassListRow extends StatelessWidget {
   }
 }
 
-/// Small round icon action button (used for approve/reject on the admin screen).
 class GlassIconAction extends StatelessWidget {
   final IconData icon;
   final Color color;
   final VoidCallback onTap;
 
-  const GlassIconAction({super.key, required this.icon, required this.color, required this.onTap});
+  const GlassIconAction({
+    super.key,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 36,
-        height: 36,
-        margin: const EdgeInsets.only(left: 6),
+        margin: const EdgeInsets.only(left: 8),
+        width: 34,
+        height: 34,
         decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.4)),
+          border: Border.all(color: color.withOpacity(0.5)),
         ),
-        child: Icon(icon, color: color, size: 18),
+        child: Icon(icon, color: color, size: 16),
+      ),
+    );
+  }
+}
+
+class GlassSelectorChip extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const GlassSelectorChip({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: colors.border),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: colors.accent, size: 20),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.w600, fontSize: 14),
+              ),
+            ),
+            Icon(Icons.unfold_more, color: colors.textSecondary),
+          ],
+        ),
       ),
     );
   }

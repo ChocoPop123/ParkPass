@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../services/auth_service.dart';
 import '../../services/company_service.dart';
+import '../../theme/theme_mode_controller.dart';
 import '../../widgets/glass_widgets.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
@@ -30,7 +31,6 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
   bool _isLoading = true;
   bool _isSaving = false;
   bool _isUploadingLogo = false;
-  bool _darkModeOn = true; // cosmetic only for now
   bool? _usernameAvailable; // null = not checked yet / invalid format / unchanged
   String? _originalUsername;
   String? _message;
@@ -143,6 +143,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
@@ -151,9 +153,10 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text('Settings', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+              Text('Settings',
+                  style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
               IconButton(
-                icon: const Icon(Icons.logout, color: Colors.white70),
+                icon: Icon(Icons.logout, color: colors.textSecondary),
                 onPressed: () => Supabase.instance.client.auth.signOut(),
               ),
             ],
@@ -162,7 +165,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           Expanded(
             child: GlassPanel(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -175,18 +178,18 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 44,
-                              backgroundColor: Colors.white.withOpacity(0.1),
+                              backgroundColor: colors.accent.withOpacity(0.1),
                               backgroundImage: _logoUrl != null ? NetworkImage(_logoUrl!) : null,
                               child: _isUploadingLogo
-                                  ? const CircularProgressIndicator(color: kAuthAccentMint)
+                                  ? CircularProgressIndicator(color: colors.accent)
                                   : (_logoUrl == null
-                                  ? const Icon(Icons.directions_bus, color: Colors.white54, size: 36)
+                                  ? Icon(Icons.directions_bus, color: colors.textSecondary, size: 36)
                                   : null),
                             ),
                             Container(
                               padding: const EdgeInsets.all(6),
-                              decoration: const BoxDecoration(color: kAuthAccentBlue, shape: BoxShape.circle),
-                              child: const Icon(Icons.camera_alt, color: Colors.white, size: 14),
+                              decoration: BoxDecoration(color: colors.accent, shape: BoxShape.circle),
+                              child: Icon(Icons.camera_alt, color: colors.buttonText, size: 14),
                             ),
                           ],
                         ),
@@ -194,13 +197,13 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     ),
                     const SizedBox(height: 6),
                     Center(
-                      child: Text('Company logo', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                      child: Text('Company logo', style: TextStyle(color: colors.textSecondary, fontSize: 12)),
                     ),
                     const SizedBox(height: 20),
 
                     const AuthFieldLabel('EMAIL'),
                     const SizedBox(height: 6),
-                    Text(_email ?? '—', style: const TextStyle(color: Colors.white70)),
+                    Text(_email ?? '—', style: TextStyle(color: colors.textSecondary)),
                     const SizedBox(height: 16),
                     const AuthFieldLabel('YOUR NAME'),
                     const SizedBox(height: 8),
@@ -210,21 +213,23 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Dark mode', style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 13)),
-                        Switch(
-                          value: _darkModeOn,
-                          activeColor: kAuthAccentMint,
-                          onChanged: (v) => setState(() => _darkModeOn = v),
+                        Text('Dark mode', style: TextStyle(color: colors.textSecondary, fontSize: 13)),
+                        ValueListenableBuilder<ThemeMode>(
+                          valueListenable: ThemeModeController.instance,
+                          builder: (context, mode, _) {
+                            return Switch(
+                              value: mode == ThemeMode.dark,
+                              activeColor: colors.accent,
+                              onChanged: (v) => ThemeModeController.instance.setDark(v),
+                            );
+                          },
                         ),
                       ],
                     ),
-                    Text(
-                      'Note: this toggle is cosmetic for now \u2014 full app-wide theming needs your theme file wired in.',
-                      style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 11),
-                    ),
 
                     const SizedBox(height: 22),
-                    Text('COMPANY DETAILS', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1)),
+                    Text('COMPANY DETAILS',
+                        style: TextStyle(color: colors.textSecondary, fontSize: 11, letterSpacing: 1)),
                     const SizedBox(height: 12),
                     const AuthFieldLabel('COMPANY NAME'),
                     const SizedBox(height: 8),
@@ -239,7 +244,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           ? null
                           : Icon(
                         _usernameAvailable! ? Icons.check_circle : Icons.cancel,
-                        color: _usernameAvailable! ? kAuthAccentGreen : const Color(0xFFFF6B81),
+                        color: _usernameAvailable! ? colors.accent : colors.danger,
                         size: 18,
                       ),
                     ),
@@ -247,7 +252,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                       Padding(
                         padding: const EdgeInsets.only(top: 6),
                         child: Text('Already taken.',
-                            style: TextStyle(color: const Color(0xFFFF6B81), fontSize: 11)),
+                            style: TextStyle(color: colors.danger, fontSize: 11)),
                       ),
                     const SizedBox(height: 16),
                     const AuthFieldLabel('REGISTRATION NUMBER'),
@@ -265,7 +270,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                     if (_message != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(_message!, style: TextStyle(color: kAuthAccentMint.withOpacity(0.9))),
+                        child: Text(_message!, style: TextStyle(color: colors.accent)),
                       ),
                     GlassGradientButton(label: 'Save', isLoading: _isSaving, onTap: _save),
                   ],

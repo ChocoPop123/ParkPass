@@ -43,22 +43,21 @@ class _AdminOverviewScreenState extends State<AdminOverviewScreen> {
     }
   }
 
-  Widget _statCard(String label, int value, IconData icon) {
+  Widget _statCard(String label, int value, IconData icon, AppColors colors) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.14)),
+          border: Border.all(color: colors.border),
         ),
         child: Column(
           children: [
-            Icon(icon, color: kAuthAccentMint, size: 22),
+            Icon(icon, color: colors.accent, size: 22),
             const SizedBox(height: 8),
-            Text('$value', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+            Text('$value', style: TextStyle(color: colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11), textAlign: TextAlign.center),
+            Text(label, style: TextStyle(color: colors.textSecondary, fontSize: 11), textAlign: TextAlign.center),
           ],
         ),
       ),
@@ -67,23 +66,24 @@ class _AdminOverviewScreenState extends State<AdminOverviewScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Overview', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+          Text('Overview', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           if (_isLoading)
-            const Expanded(child: Center(child: CircularProgressIndicator(color: kAuthAccentMint)))
+            Expanded(child: Center(child: CircularProgressIndicator(color: colors.accent)))
           else
             Row(
               children: [
-                _statCard('Routes', _routeCount, Icons.alt_route),
+                _statCard('Routes', _routeCount, Icons.alt_route, colors),
                 const SizedBox(width: 10),
-                _statCard('Trips', _tripCount, Icons.directions_bus),
+                _statCard('Trips', _tripCount, Icons.directions_bus, colors),
                 const SizedBox(width: 10),
-                _statCard('Conductors', _conductorCount, Icons.person),
+                _statCard('Conductors', _conductorCount, Icons.person, colors),
               ],
             ),
         ],

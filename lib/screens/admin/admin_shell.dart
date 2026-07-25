@@ -15,7 +15,7 @@ class AdminShell extends StatefulWidget {
 class _AdminShellState extends State<AdminShell> {
   int _index = 0;
 
-  Widget _navItem(IconData icon, String label, int idx) {
+  Widget _navItem(IconData icon, String label, int idx, AppColors colors) {
     final selected = _index == idx;
     return Expanded(
       child: GestureDetector(
@@ -23,11 +23,11 @@ class _AdminShellState extends State<AdminShell> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: selected ? kAuthAccentMint : Colors.white.withOpacity(0.45), size: 22),
+            Icon(icon, color: selected ? colors.accent : colors.textSecondary, size: 22),
             const SizedBox(height: 4),
             Text(label,
                 style: TextStyle(
-                  color: selected ? kAuthAccentMint : Colors.white.withOpacity(0.45),
+                  color: selected ? colors.accent : colors.textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 )),
@@ -39,6 +39,7 @@ class _AdminShellState extends State<AdminShell> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     final screens = [
       AdminOverviewScreen(companyId: widget.companyId),
       AdminRequestsScreen(companyId: widget.companyId),
@@ -54,15 +55,15 @@ class _AdminShellState extends State<AdminShell> {
               margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.18)),
+                border: Border.all(color: colors.border),
               ),
               child: Row(
                 children: [
-                  _navItem(Icons.dashboard_outlined, 'Overview', 0),
-                  _navItem(Icons.how_to_reg, 'Requests', 1),
-                  _navItem(Icons.settings, 'Settings', 2),
+                  _navItem(Icons.dashboard_outlined, 'Overview', 0, colors),
+                  _navItem(Icons.how_to_reg, 'Requests', 1, colors),
+                  _navItem(Icons.settings, 'Settings', 2, colors),
                 ],
               ),
             ),
