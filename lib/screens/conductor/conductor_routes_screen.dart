@@ -66,7 +66,7 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                   : _routes.isEmpty
-                  ? Center(child: Text('No routes yet.', style: TextStyle(color: Colors.white.withOpacity(0.6))))
+                  ? Center(child: Text('No routes yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
                   : ListView.builder(
                 itemCount: _routes.length,
                 itemBuilder: (context, index) {

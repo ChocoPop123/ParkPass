@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/trip_service.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/glass_widgets.dart';
 
 class CreateRouteScreen extends StatefulWidget {
   const CreateRouteScreen({super.key});
@@ -99,15 +100,11 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
                 padding: const EdgeInsets.only(bottom: 16),
                 child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
               ),
-            _isLoading
-                ? const CircularProgressIndicator()
-                : SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _handleCreate,
-                      child: const Text('Create Route'),
-                    ),
-                  ),
+            GlassGradientButton(
+              label: 'Create Route',
+              isLoading: _isLoading,
+              onTap: _handleCreate,
+            ),
           ],
         ),
       ),

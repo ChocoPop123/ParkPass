@@ -74,9 +74,9 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                   : _errorMessage != null
-                  ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.white.withOpacity(0.7))))
+                  ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.white.withValues(alpha: 0.7))))
                   : _trips.isEmpty
-                  ? Center(child: Text('No trips yet.', style: TextStyle(color: Colors.white.withOpacity(0.6))))
+                  ? Center(child: Text('No trips yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
                   : ListView.builder(
                 itemCount: _trips.length,
                 itemBuilder: (context, index) {

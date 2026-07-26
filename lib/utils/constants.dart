@@ -13,4 +13,5 @@ const List<String> ugandaCities = [
   'Arua',
   'Gulu',
   'Soroti',
+  'Lira',
 ];

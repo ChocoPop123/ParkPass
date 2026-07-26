@@ -108,15 +108,15 @@ class _CompanyLogoRow extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: Colors.white.withOpacity(0.14)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
         child: Row(
           children: [
             CircleAvatar(
               radius: 18,
-              backgroundColor: Colors.white.withOpacity(0.1),
+              backgroundColor: Colors.white.withValues(alpha: 0.1),
               backgroundImage: company.logoUrl != null ? NetworkImage(company.logoUrl!) : null,
               child: company.logoUrl == null
                   ? const Icon(Icons.directions_bus, color: Colors.white54, size: 18)
@@ -130,7 +130,7 @@ class _CompanyLogoRow extends StatelessWidget {
                   Text(company.name, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
                   if (company.username != null)
                     Text('@${company.username}',
-                        style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 12)),
+                        style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 12)),
                 ],
               ),
             ),

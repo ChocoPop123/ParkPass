@@ -123,7 +123,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                           children: [
                             CircleAvatar(
                               radius: 44,
-                              backgroundColor: Colors.white.withOpacity(0.1),
+                              backgroundColor: Colors.white.withValues(alpha: 0.1),
                               backgroundImage: _avatarUrl != null ? NetworkImage(_avatarUrl!) : null,
                               child: _isUploadingAvatar
                                   ? const CircularProgressIndicator(color: kAuthAccentMint)
@@ -160,7 +160,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
                     if (_message != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 12),
-                        child: Text(_message!, style: TextStyle(color: kAuthAccentMint.withOpacity(0.9))),
+                        child: Text(_message!, style: TextStyle(color: kAuthAccentMint.withValues(alpha: 0.9))),
                       ),
                     GlassGradientButton(label: 'Save', isLoading: _isSaving, onTap: _save),
                   ],

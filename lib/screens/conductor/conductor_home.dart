@@ -76,9 +76,9 @@ class _ConductorHomeState extends State<ConductorHome> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 14),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.08),
+                          color: Colors.white.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(14),
-                          border: Border.all(color: Colors.white.withOpacity(0.18)),
+                          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
                         ),
                         child: const Center(
                           child: Text('+ New Route', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 13)),
@@ -113,9 +113,9 @@ class _ConductorHomeState extends State<ConductorHome> {
                   child: _isLoading
                       ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                       : _errorMessage != null
-                      ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.white.withOpacity(0.7)), textAlign: TextAlign.center))
+                      ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.white.withValues(alpha: 0.7)), textAlign: TextAlign.center))
                       : _trips.isEmpty
-                      ? Center(child: Text('No trips yet — create one above.', style: TextStyle(color: Colors.white.withOpacity(0.6))))
+                      ? Center(child: Text('No trips yet — create one above.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
                       : ListView.builder(
                     itemCount: _trips.length,
                     itemBuilder: (context, index) {

@@ -85,9 +85,9 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
         margin: const EdgeInsets.only(right: 8),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isActive ? kAuthAccentBlue : Colors.white.withOpacity(0.08),
+          color: isActive ? kAuthAccentBlue : Colors.white.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: Colors.white.withOpacity(0.18)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
         ),
         child: Text(label, style: TextStyle(color: isActive ? Colors.white : Colors.white70, fontSize: 12, fontWeight: FontWeight.w600)),
       ),
@@ -124,7 +124,7 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                         context,
                         MaterialPageRoute(builder: (_) => CreateTripScreen(existingTrip: _trip)),
                       );
-                      if (changed == true && mounted) {
+                      if (changed == true && context.mounted) {
                         Navigator.pop(context, true);
                       }
                     },
@@ -145,20 +145,20 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     const SizedBox(height: 4),
                     Text(
                       '${_trip.busNumberPlate ?? "No plate set"} · ${_trip.busColor ?? "No color set"}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Driver: ${_trip.driverName ?? "—"} · ${_trip.driverContact ?? "—"}',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       'Fare: UGX ${_trip.effectiveFare.toStringAsFixed(0)} · Seats: ${_trip.vehicleSeatCount} · Cargo left: ${_trip.remainingCargoKg}kg',
-                      style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12),
+                      style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12),
                     ),
                     const SizedBox(height: 16),
-                    Text('STATUS', style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 11, letterSpacing: 1)),
+                    Text('STATUS', style: TextStyle(color: Colors.white.withValues(alpha: 0.5), fontSize: 11, letterSpacing: 1)),
                     const SizedBox(height: 8),
                     Row(
                       children: [
@@ -171,19 +171,19 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                     if (_trip.isPastDeparture && _trip.status == 'scheduled') ...[
                       const SizedBox(height: 8),
                       Text('Auto-marked as departed (5+ min past departure time)',
-                          style: TextStyle(color: kAuthAccentMint.withOpacity(0.8), fontSize: 11)),
+                          style: TextStyle(color: kAuthAccentMint.withValues(alpha: 0.8), fontSize: 11)),
                     ],
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-              Text('PASSENGER MANIFEST', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, letterSpacing: 1)),
+              Text('PASSENGER MANIFEST', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               GlassPanel(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                     : _manifest.isEmpty
-                    ? Text('No bookings yet.', style: TextStyle(color: Colors.white.withOpacity(0.5)))
+                    ? Text('No bookings yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.5)))
                     : Column(
                   children: _manifest.map((b) {
                     return GlassListRow(
@@ -195,13 +195,13 @@ class _TripDetailScreenState extends State<TripDetailScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text('CARGO BOOKINGS', style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 12, letterSpacing: 1)),
+              Text('CARGO BOOKINGS', style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 12, letterSpacing: 1)),
               const SizedBox(height: 8),
               GlassPanel(
                 child: _isLoading
                     ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                     : _cargo.isEmpty
-                    ? Text('No cargo bookings yet.', style: TextStyle(color: Colors.white.withOpacity(0.5)))
+                    ? Text('No cargo bookings yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.5)))
                     : Column(
                   children: _cargo.map((c) {
                     return GlassListRow(

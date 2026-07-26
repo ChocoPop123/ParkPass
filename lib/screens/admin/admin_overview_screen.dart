@@ -48,9 +48,9 @@ class _AdminOverviewScreenState extends State<AdminOverviewScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 18),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.06),
+          color: Colors.white.withValues(alpha: 0.06),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.14)),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.14)),
         ),
         child: Column(
           children: [
@@ -58,7 +58,7 @@ class _AdminOverviewScreenState extends State<AdminOverviewScreen> {
             const SizedBox(height: 8),
             Text('$value', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
             const SizedBox(height: 4),
-            Text(label, style: TextStyle(color: Colors.white.withOpacity(0.6), fontSize: 11), textAlign: TextAlign.center),
+            Text(label, style: TextStyle(color: Colors.white.withValues(alpha: 0.6), fontSize: 11), textAlign: TextAlign.center),
           ],
         ),
       ),

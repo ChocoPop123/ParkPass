@@ -49,7 +49,7 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
               child: _isLoading
                   ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
                   : _pending.isEmpty
-                  ? Center(child: Text('No pending conductor requests.', style: TextStyle(color: Colors.white.withOpacity(0.6))))
+                  ? Center(child: Text('No pending conductor requests.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
                   : ListView.builder(
                 itemCount: _pending.length,
                 itemBuilder: (context, index) {

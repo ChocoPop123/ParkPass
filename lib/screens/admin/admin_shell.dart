@@ -23,11 +23,11 @@ class _AdminShellState extends State<AdminShell> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: selected ? kAuthAccentMint : Colors.white.withOpacity(0.45), size: 22),
+            Icon(icon, color: selected ? kAuthAccentMint : Colors.white.withValues(alpha: 0.45), size: 22),
             const SizedBox(height: 4),
             Text(label,
                 style: TextStyle(
-                  color: selected ? kAuthAccentMint : Colors.white.withOpacity(0.45),
+                  color: selected ? kAuthAccentMint : Colors.white.withValues(alpha: 0.45),
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 )),
@@ -54,9 +54,9 @@ class _AdminShellState extends State<AdminShell> {
               margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.08),
+                color: Colors.white.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withOpacity(0.18)),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
               ),
               child: Row(
                 children: [

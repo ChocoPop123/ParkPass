@@ -6,17 +6,7 @@ import '../../widgets/glass_widgets.dart';
 import '../seat_selection_screen.dart';
 
 class SearchRoutesScreen extends StatefulWidget {
-  // These allow the Home screen to pass the selected cities and date
-  final String? initialOrigin;
-  final String? initialDestination;
-  final DateTime? initialDate;
-
-  const SearchRoutesScreen({
-    super.key,
-    this.initialOrigin,
-    this.initialDestination,
-    this.initialDate,
-  });
+  const SearchRoutesScreen({super.key});
 
   @override
   State<SearchRoutesScreen> createState() => _SearchRoutesScreenState();
@@ -27,44 +17,12 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
   String? toCity;
   DateTime? selectedDate;
 
+  Future<List<Map<String, dynamic>>>? _tripResults;
+  bool _hasSearched = false;
+  bool isLoading = false;
   final TripService _tripService = TripService();
 
-  List<Map<String, dynamic>> trips = [];
-  bool isLoading = false;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // 1. Grab the data passed from the Passenger Home screen
-    fromCity = widget.initialOrigin;
-    toCity = widget.initialDestination;
-    selectedDate = widget.initialDate;
-
-    // 2. If the user already selected cities, auto-run the search!
-    if (fromCity != null && toCity != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        searchTrips();
-      });
-    }
-  }
-
-  Future<void> pickDate() async {
-    final picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2030),
-    );
-
-    if (picked != null) {
-      setState(() {
-        selectedDate = picked;
-      });
-    }
-  }
-
-  void _showCityPicker({required bool isOrigin}) {
+  void _showCityPicker({required bool isDeparture}) {
     showModalBottomSheet(
       context: context,
       backgroundColor: const Color(0xFF1E293B),
@@ -73,13 +31,15 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
       ),
       builder: (context) {
         return Container(
-          padding: const EdgeInsets.all(20),
-          height: 400,
+          padding: const EdgeInsets.all(20.0),
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.5,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                isOrigin ? "Select Origin City" : "Select Destination City",
+                isDeparture ? 'Select Departure City' : 'Select Destination City',
                 style: const TextStyle(
                   color: Colors.white,
                   fontSize: 18,
@@ -93,14 +53,14 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
                   itemBuilder: (context, index) {
                     final city = ugandaCities[index];
                     return ListTile(
-                      leading: const Icon(Icons.location_city, color: Colors.white70),
                       title: Text(
                         city,
-                        style: const TextStyle(color: Colors.white),
+                        style: const TextStyle(color: Colors.white, fontSize: 16),
                       ),
+                      trailing: const Icon(Icons.chevron_right, color: Colors.white54),
                       onTap: () {
                         setState(() {
-                          if (isOrigin) {
+                          if (isDeparture) {
                             fromCity = city;
                           } else {
                             toCity = city;
@@ -119,307 +79,426 @@ class _SearchRoutesScreenState extends State<SearchRoutesScreen> {
     );
   }
 
-  Future<void> searchTrips() async {
-    if (fromCity == null || toCity == null) {
+  Future<void> _searchTrips() async {
+    if (fromCity == null || toCity == null || selectedDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select origin and destination'),
-        ),
-      );
-      return;
-    }
-
-    if (fromCity == toCity) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Origin and destination cannot be the same'),
-        ),
+        const SnackBar(content: Text('Please select origin, destination, and date')),
       );
       return;
     }
 
     setState(() {
+      _hasSearched = true;
       isLoading = true;
+      _tripResults = _tripService.searchTrips(
+        origin: fromCity!,
+        destination: toCity!,
+        date: selectedDate!,
+      );
     });
 
     try {
-      // 3. Pass the specific date to your updated TripService
-      final results = await _tripService.searchTrips(
-        origin: fromCity!,
-        destination: toCity!,
-        date: selectedDate,
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        trips = results;
-      });
+      await _tripResults;
     } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Error: $e"),
-        ),
-      );
+      // Error handled by FutureBuilder
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
-
-    if (!mounted) return;
-
-    setState(() {
-      isLoading = false;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: AuthBackground(
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+          children: [
+            // Header Section
+            Row(
               children: [
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        color: Colors.white,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    const Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Search Trips",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            "Find your next journey",
-                            style: TextStyle(
-                              color: Colors.white70,
-                              fontSize: 15,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                IconButton(
+                  onPressed: () => Navigator.maybePop(context),
+                  icon: const Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    color: Colors.white,
+                  ),
                 ),
-                const SizedBox(height: 30),
-                GlassPanel(
+                const SizedBox(width: 8),
+                const Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      InkWell(
-                        onTap: () => _showCityPicker(isOrigin: true),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .06),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: .15),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.location_on_rounded,
-                                color: Colors.white70,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "From",
-                                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                                  ),
-                                  Text(
-                                    fromCity ?? "Select Departure",
-                                    style: TextStyle(
-                                      color: fromCity != null ? Colors.white : Colors.white60,
-                                      fontSize: 16,
-                                      fontWeight: fromCity != null ? FontWeight.w600 : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                      Text(
+                        "Search Trips",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: () => _showCityPicker(isOrigin: false),
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .06),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: .15),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.flag_rounded,
-                                color: Colors.white70,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "To",
-                                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                                  ),
-                                  Text(
-                                    toCity ?? "Select Destination",
-                                    style: TextStyle(
-                                      color: toCity != null ? Colors.white : Colors.white60,
-                                      fontSize: 16,
-                                      fontWeight: toCity != null ? FontWeight.w600 : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+                      SizedBox(height: 4),
+                      Text(
+                        "Find your next journey",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 15,
                         ),
-                      ),
-                      const SizedBox(height: 16),
-                      InkWell(
-                        onTap: pickDate,
-                        borderRadius: BorderRadius.circular(14),
-                        child: Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .06),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: .15),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.calendar_today_rounded,
-                                color: Colors.white70,
-                              ),
-                              const SizedBox(width: 12),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    "Departure Date",
-                                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                                  ),
-                                  Text(
-                                    selectedDate == null
-                                        ? "Choose Date"
-                                        : DateFormat("dd MMM yyyy").format(selectedDate!),
-                                    style: TextStyle(
-                                      color: selectedDate != null ? Colors.white : Colors.white60,
-                                      fontSize: 16,
-                                      fontWeight: selectedDate != null ? FontWeight.w600 : FontWeight.normal,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      GlassGradientButton(
-                        label: "Search Trips",
-                        onTap: searchTrips,
-                        isLoading: isLoading,
                       ),
                     ],
                   ),
                 ),
-                const SizedBox(height: 20),
-                if (isLoading)
-                  const Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  )
-                else if (trips.isEmpty)
-                  const Expanded(
-                    child: Center(
-                      child: Text(
-                        "No trips found for this route and date.",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: Colors.white70),
-                      ),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: trips.length,
-                      itemBuilder: (context, index) {
-                        final trip = trips[index];
+              ],
+            ),
+            const SizedBox(height: 20),
 
-                        return Card(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          child: ListTile(
-                            leading: const Icon(Icons.directions_bus),
-                            title: Text(
-                              "${trip['bus_class'] ?? 'Ordinary'} Bus (${trip['bus_number_plate'] ?? 'No Plate'})",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            subtitle: Text(
-                              "${trip['routes']['origin']} → ${trip['routes']['destination']}\n"
-                                  "${DateFormat('dd MMM yyyy, hh:mm a').format(DateTime.parse(trip['departure_time']))}",
-                            ),
-                            trailing: Text(
-                              "UGX ${trip['routes']['base_fare']}",
-                              style: const TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => SeatSelectionScreen(
-                                    tripId: trip['id'],
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
+            // Search Form
+            GlassPanel(
+              child: Column(
+                children: [
+                  _buildInputCard(
+                    icon: Icons.location_on,
+                    label: 'From',
+                    value: fromCity ?? 'Select Departure',
+                    onTap: () => _showCityPicker(isDeparture: true),
+                  ),
+                  Center(
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.swap_vert_circle,
+                        size: 32,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          final temp = fromCity;
+                          fromCity = toCity;
+                          toCity = temp;
+                        });
                       },
                     ),
                   ),
+                  _buildInputCard(
+                    icon: Icons.flag,
+                    label: 'To',
+                    value: toCity ?? 'Select Destination',
+                    onTap: () => _showCityPicker(isDeparture: false),
+                  ),
+                  const SizedBox(height: 12),
+                  GlassSelectorChip(
+                    icon: Icons.calendar_today,
+                    label: selectedDate == null
+                        ? 'Choose Date'
+                        : DateFormat('dd MMM yyyy').format(selectedDate!),
+                    onTap: () async {
+                      DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                        builder: (context, child) {
+                          return Theme(
+                            data: ThemeData.dark(),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          selectedDate = picked;
+                        });
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            GlassGradientButton(
+              label: "Search Trips",
+              onTap: _searchTrips,
+              isLoading: isLoading,
+            ),
+            const SizedBox(height: 24),
+
+            // Results Section
+            if (_hasSearched)
+              FutureBuilder<List<Map<String, dynamic>>>(
+                future: _tripResults,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(color: kAuthAccentBlue),
+                          SizedBox(height: 16),
+                          Text(
+                            "Searching for best routes...",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                        ],
+                      ),
+                    );
+                  } else if (snapshot.hasError) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 20),
+                      child: Text(
+                        'Error loading trips: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.redAccent),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 20),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.bus_alert_rounded,
+                              color: Colors.white24, size: 48),
+                          SizedBox(height: 16),
+                          Text(
+                            'No trips found for this route and date.',
+                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  final trips = snapshot.data!;
+                  return Column(
+                    children: trips.map((trip) => _buildTripCard(trip)).toList(),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTripCard(Map<String, dynamic> trip) {
+    final departureTime = DateTime.parse(trip['departure_time']);
+    final formattedTime = DateFormat('hh:mm a').format(departureTime);
+    final busClass = trip['bus_class'] ?? 'Ordinary';
+    final plate = trip['bus_number_plate'] ?? '—';
+    final fare = trip['fare_override'] ?? trip['routes']['base_fare'];
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.12)),
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: kAuthAccentBlue.withValues(alpha: 0.15),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.directions_bus,
+                      color: kAuthAccentBlue, size: 24),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Text(
+                            "$busClass",
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _buildClassBadge(busClass),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        "Plate: $plate • $formattedTime",
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: kAuthAccentGreen.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                        color: kAuthAccentGreen.withValues(alpha: 0.3)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        "UGX $fare",
+                        style: const TextStyle(
+                          color: kAuthAccentGreen,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const Text(
+                        "per seat",
+                        style: TextStyle(
+                          color: Colors.white54,
+                          fontSize: 10,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
-          ),
+            const SizedBox(height: 16),
+            const Divider(color: Colors.white10, height: 1),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.airline_seat_recline_normal,
+                        color: Colors.white38, size: 16),
+                    const SizedBox(width: 4),
+                    Text(
+                      "${trip['vehicle_seat_count']} Total Seats",
+                      style:
+                          const TextStyle(color: Colors.white38, fontSize: 13),
+                    ),
+                  ],
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => SeatSelectionScreen(
+                          tripId: trip['id'],
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: kAuthAccentBlue,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  ),
+                  child: const Text(
+                    "Book Now",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildClassBadge(String busClass) {
+    Color color = Colors.grey;
+    if (busClass.toLowerCase().contains('vip')) {
+      color = Colors.purpleAccent;
+    } else if (busClass.toLowerCase().contains('exec')) {
+      color = kAuthAccentBlue;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: color.withValues(alpha: 0.5), width: 0.5),
+      ),
+      child: Text(
+        "CLASS",
+        style: TextStyle(
+          color: color,
+          fontSize: 8,
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.5,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInputCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.white70),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: const TextStyle(color: Colors.white54, fontSize: 12),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      color: value.startsWith('Select') || value == 'Choose Date'
+                          ? Colors.white60
+                          : Colors.white,
+                      fontSize: 16,
+                      fontWeight: value.startsWith('Select') || value == 'Choose Date'
+                          ? FontWeight.normal
+                          : FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

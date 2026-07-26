@@ -254,7 +254,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                   children: [
                                     CircleAvatar(
                                       radius: 12,
-                                      backgroundColor: Colors.white.withOpacity(0.1),
+                                      backgroundColor: Colors.white.withValues(alpha: 0.1),
                                       backgroundImage: c.logoUrl != null ? NetworkImage(c.logoUrl!) : null,
                                       child: c.logoUrl == null ? const Icon(Icons.directions_bus, color: Colors.white54, size: 12) : null,
                                     ),
@@ -267,7 +267,7 @@ class _SignupScreenState extends State<SignupScreen> {
                                         if (c.username != null)
                                           Text(
                                             '@${c.username}',
-                                            style: TextStyle(color: Colors.white.withOpacity(0.4), fontSize: 10),
+                                            style: TextStyle(color: Colors.white.withValues(alpha: 0.4), fontSize: 10),
                                           ),
                                       ],
                                     ),
