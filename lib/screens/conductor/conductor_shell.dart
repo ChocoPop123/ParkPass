@@ -20,7 +20,7 @@ class _ConductorShellState extends State<ConductorShell> {
     ConductorProfileScreen(),
   ];
 
-  Widget _navItem(IconData icon, String label, int idx) {
+  Widget _navItem(IconData icon, String label, int idx, AppColors colors) {
     final selected = _index == idx;
     return Expanded(
       child: GestureDetector(
@@ -28,11 +28,11 @@ class _ConductorShellState extends State<ConductorShell> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: selected ? kAuthAccentMint : Colors.white.withValues(alpha: 0.45), size: 22),
+            Icon(icon, color: selected ? colors.accent : colors.textSecondary, size: 22),
             const SizedBox(height: 4),
             Text(label,
                 style: TextStyle(
-                  color: selected ? kAuthAccentMint : Colors.white.withValues(alpha: 0.45),
+                  color: selected ? colors.accent : colors.textSecondary,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 )),
@@ -44,6 +44,7 @@ class _ConductorShellState extends State<ConductorShell> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       body: AuthBackground(
         child: Column(
@@ -53,15 +54,15 @@ class _ConductorShellState extends State<ConductorShell> {
               margin: const EdgeInsets.fromLTRB(20, 0, 20, 16),
               padding: const EdgeInsets.symmetric(vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.08),
+                color: colors.surface,
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.18)),
+                border: Border.all(color: colors.border),
               ),
               child: Row(
                 children: [
-                  _navItem(Icons.alt_route, 'Routes', 0),
-                  _navItem(Icons.directions_bus, 'Trips', 1),
-                  _navItem(Icons.person, 'Profile', 2),
+                  _navItem(Icons.alt_route, 'Routes', 0, colors),
+                  _navItem(Icons.directions_bus, 'Trips', 1, colors),
+                  _navItem(Icons.person, 'Profile', 2, colors),
                 ],
               ),
             ),

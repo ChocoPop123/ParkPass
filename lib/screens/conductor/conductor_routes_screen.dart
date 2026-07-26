@@ -37,12 +37,13 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Routes', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+          Text('Routes', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () async {
@@ -52,11 +53,11 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [kAuthAccentBlue, kAuthAccentSkyBlue]),
+                color: colors.accent,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Center(
-                child: Text('+ New Route', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              child: Center(
+                child: Text('+ New Route', style: TextStyle(color: colors.buttonText, fontWeight: FontWeight.w600)),
               ),
             ),
           ),
@@ -64,17 +65,17 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
           Expanded(
             child: GlassPanel(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : _routes.isEmpty
-                  ? Center(child: Text('No routes yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
+                  ? Center(child: Text('No routes yet.', style: TextStyle(color: colors.textSecondary)))
                   : ListView.builder(
                 itemCount: _routes.length,
                 itemBuilder: (context, index) {
                   final r = _routes[index];
                   return GlassListRow(
                     icon: Icons.alt_route,
-                    title: '${r.origin} → ${r.destination}',
-                    subtitle: 'Fare: UGX ${r.baseFare.toStringAsFixed(0)} · Cargo: UGX ${r.cargoPricePerKg.toStringAsFixed(0)}/kg',
+                    title: '${r.origin} \u2192 ${r.destination}',
+                    subtitle: 'Fare: UGX ${r.baseFare.toStringAsFixed(0)} \u00b7 Cargo: UGX ${r.cargoPricePerKg.toStringAsFixed(0)}/kg',
                   );
                 },
               ),

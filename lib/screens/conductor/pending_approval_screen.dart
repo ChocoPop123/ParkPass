@@ -7,6 +7,7 @@ class PendingApprovalScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       body: AuthBackground(
         child: Center(
@@ -16,20 +17,20 @@ class PendingApprovalScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.hourglass_top_rounded, color: kAuthAccentMint, size: 40),
+                  Icon(Icons.hourglass_top_rounded, color: colors.accent, size: 40),
                   const SizedBox(height: 16),
-                  const Text('Pending Approval',
-                      style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w700)),
+                  Text('Pending Approval',
+                      style: TextStyle(color: colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 10),
                   Text(
                     "Your account is waiting for approval from your company's admin. Check back soon.",
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+                    style: TextStyle(color: colors.textSecondary),
                   ),
                   const SizedBox(height: 20),
                   TextButton(
                     onPressed: () => Supabase.instance.client.auth.signOut(),
-                    child: const Text('Log out', style: TextStyle(color: Colors.white70)),
+                    child: Text('Log out', style: TextStyle(color: colors.textSecondary)),
                   ),
                 ],
               ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/trip_service.dart';
-import '../../services/auth_service.dart';
+import '../../services/company_service.dart';
 import '../../widgets/glass_widgets.dart';
 
 class CreateRouteScreen extends StatefulWidget {
@@ -10,17 +10,23 @@ class CreateRouteScreen extends StatefulWidget {
   State<CreateRouteScreen> createState() => _CreateRouteScreenState();
 }
 
-
 class _CreateRouteScreenState extends State<CreateRouteScreen> {
   final _tripService = TripService();
-  final _authService = AuthService();
+  final _companyService = CompanyService();
   final _originController = TextEditingController();
   final _destinationController = TextEditingController();
   final _fareController = TextEditingController();
   final _cargoPriceController = TextEditingController();
 
+  String? _companyId;
   bool _isLoading = false;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCompanyId();
+  }
 
   @override
   void dispose() {
@@ -31,36 +37,32 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
     super.dispose();
   }
 
-  Future<void> _handleCreate() async {
-    if (_originController.text.isEmpty || 
-        _destinationController.text.isEmpty || 
-        _fareController.text.isEmpty || 
-        _cargoPriceController.text.isEmpty) {
-      setState(() => _errorMessage = 'Please fill all fields');
-      return;
+  Future<void> _loadCompanyId() async {
+    try {
+      final id = await _companyService.getMyCompanyId();
+      setState(() => _companyId = id);
+    } catch (e) {
+      setState(() => _errorMessage = 'Could not load your company: $e');
     }
+  }
 
+  Future<void> _handleCreate() async {
+    if (_companyId == null) return;
+    
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
 
     try {
-      final profile = await _authService.getCurrentUserProfile();
-      final companyId = profile?['company_id'];
-
-      if (companyId == null) {
-        throw Exception('User profile has no associated company.');
-      }
-
       await _tripService.createRoute(
         origin: _originController.text.trim(),
         destination: _destinationController.text.trim(),
         baseFare: double.parse(_fareController.text.trim()),
         cargoPricePerKg: double.parse(_cargoPriceController.text.trim()),
-        companyId: companyId,
+        companyId: _companyId!,
       );
-      if (mounted) Navigator.pop(context, true); // true = "something was created"
+      if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(() => _errorMessage = e.toString());
     } finally {
@@ -70,42 +72,53 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Create Route')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: _originController,
-              decoration: const InputDecoration(labelText: 'Origin (e.g. Kampala)'),
-            ),
-            TextField(
-              controller: _destinationController,
-              decoration: const InputDecoration(labelText: 'Destination (e.g. Gulu)'),
-            ),
-            TextField(
-              controller: _fareController,
-              decoration: const InputDecoration(labelText: 'Base fare per seat (UGX)'),
-              keyboardType: TextInputType.number,
-            ),
-            TextField(
-              controller: _cargoPriceController,
-              decoration: const InputDecoration(labelText: 'Cargo price per kg (UGX)'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 24),
-            if (_errorMessage != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Text(_errorMessage!, style: const TextStyle(color: Colors.red)),
+      body: AuthBackground(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.arrow_back, color: colors.textSecondary),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Text('Create Route',
+                      style: TextStyle(color: colors.textPrimary, fontSize: 20, fontWeight: FontWeight.w700)),
+                ],
               ),
-            GlassGradientButton(
-              label: 'Create Route',
-              isLoading: _isLoading,
-              onTap: _handleCreate,
-            ),
-          ],
+              const SizedBox(height: 16),
+              GlassPanel(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const AuthFieldLabel('ORIGIN'),
+                    const SizedBox(height: 8),
+                    GlassTextField(controller: _originController, hint: 'e.g. Kampala'),
+                    const SizedBox(height: 16),
+                    const AuthFieldLabel('DESTINATION'),
+                    const SizedBox(height: 8),
+                    GlassTextField(controller: _destinationController, hint: 'e.g. Gulu'),
+                    const SizedBox(height: 16),
+                    const AuthFieldLabel('BASE FARE PER SEAT (UGX)'),
+                    const SizedBox(height: 8),
+                    GlassTextField(controller: _fareController, hint: 'e.g. 45000', keyboardType: TextInputType.number),
+                    const SizedBox(height: 16),
+                    const AuthFieldLabel('CARGO PRICE PER KG (UGX)'),
+                    const SizedBox(height: 8),
+                    GlassTextField(controller: _cargoPriceController, hint: 'e.g. 2000', keyboardType: TextInputType.number),
+                    const SizedBox(height: 22),
+                    if (_errorMessage != null) AuthErrorText(_errorMessage!),
+                    GlassGradientButton(label: 'Create Route', isLoading: _isLoading, onTap: _handleCreate),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

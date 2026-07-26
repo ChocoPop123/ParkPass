@@ -37,19 +37,20 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Pending Requests', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+          Text('Pending Requests', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           Expanded(
             child: GlassPanel(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : _pending.isEmpty
-                  ? Center(child: Text('No pending conductor requests.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
+                  ? Center(child: Text('No pending conductor requests.', style: TextStyle(color: colors.textSecondary)))
                   : ListView.builder(
                 itemCount: _pending.length,
                 itemBuilder: (context, index) {
@@ -63,12 +64,12 @@ class _AdminRequestsScreenState extends State<AdminRequestsScreen> {
                       children: [
                         GlassIconAction(
                           icon: Icons.check,
-                          color: kAuthAccentGreen,
+                          color: colors.accent,
                           onTap: () => _respond(conductor['id'], 'approved'),
                         ),
                         GlassIconAction(
                           icon: Icons.close,
-                          color: const Color(0xFFFF6B81),
+                          color: colors.danger,
                           onTap: () => _respond(conductor['id'], 'rejected'),
                         ),
                       ],

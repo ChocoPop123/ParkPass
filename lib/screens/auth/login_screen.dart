@@ -54,6 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: AuthBackground(
@@ -67,24 +68,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Center(
+                    Center(
                       child: Text(
                         'Welcome Back',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                        ),
+                        style: TextStyle(color: colors.textPrimary, fontSize: 26, fontWeight: FontWeight.w700),
                       ),
                     ),
                     const SizedBox(height: 6),
                     Center(
                       child: Text(
                         'Sign in to your account',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: colors.textSecondary, fontSize: 14),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -110,7 +104,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const SizedBox(height: 8),
                     GlassTextField(
                       controller: _passwordController,
-                      hint: '••••••',
+                      hint: '\u2022\u2022\u2022\u2022\u2022\u2022',
                       obscureText: _obscurePassword,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
@@ -120,14 +114,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       },
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: Colors.white.withValues(alpha: 0.5),
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: colors.textSecondary,
                           size: 20,
                         ),
-                        onPressed: () =>
-                            setState(() => _obscurePassword = !_obscurePassword),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -138,13 +129,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         onTap: () {
                           // TODO: forgot password flow
                         },
-                        child: const Text(
+                        child: Text(
                           'Forgot Password?',
-                          style: TextStyle(
-                            color: kAuthAccentMint,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(color: colors.accent, fontSize: 12, fontWeight: FontWeight.w500),
                         ),
                       ),
                     ),
@@ -169,7 +156,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text(
                           "Don't have an account? Sign up",
-                          style: TextStyle(color: Colors.white.withValues(alpha: 0.7)),
+                          style: TextStyle(color: colors.textSecondary),
                         ),
                       ),
                     ),

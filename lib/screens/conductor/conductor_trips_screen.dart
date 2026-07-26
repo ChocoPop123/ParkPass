@@ -45,12 +45,13 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('Trips', style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700)),
+          Text('Trips', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
           const SizedBox(height: 16),
           GestureDetector(
             onTap: () async {
@@ -60,11 +61,11 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 14),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(colors: [kAuthAccentBlue, kAuthAccentSkyBlue]),
+                color: colors.accent,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: const Center(
-                child: Text('+ New Trip', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+              child: Center(
+                child: Text('+ New Trip', style: TextStyle(color: colors.buttonText, fontWeight: FontWeight.w600)),
               ),
             ),
           ),
@@ -72,23 +73,23 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
           Expanded(
             child: GlassPanel(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator(color: kAuthAccentMint))
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : _errorMessage != null
-                  ? Center(child: Text(_errorMessage!, style: TextStyle(color: Colors.white.withValues(alpha: 0.7))))
+                  ? Center(child: Text(_errorMessage!, style: TextStyle(color: colors.textSecondary)))
                   : _trips.isEmpty
-                  ? Center(child: Text('No trips yet.', style: TextStyle(color: Colors.white.withValues(alpha: 0.6))))
+                  ? Center(child: Text('No trips yet.', style: TextStyle(color: colors.textSecondary)))
                   : ListView.builder(
                 itemCount: _trips.length,
                 itemBuilder: (context, index) {
                   final trip = _trips[index];
                   final routeLabel = trip.routeOrigin != null
-                      ? '${trip.routeOrigin} → ${trip.routeDestination}'
+                      ? '${trip.routeOrigin} \u2192 ${trip.routeDestination}'
                       : 'Route';
                   return GlassListRow(
                     icon: Icons.directions_bus,
                     title: routeLabel,
                     subtitle:
-                    '${trip.departureTime.toString().substring(0, 16)} · ${trip.busClass} · ${trip.displayStatus}',
+                    '${trip.departureTime.toString().substring(0, 16)} \u00b7 ${trip.busClass} \u00b7 ${trip.displayStatus}',
                     onTap: () async {
                       final changed = await Navigator.push(
                         context,
