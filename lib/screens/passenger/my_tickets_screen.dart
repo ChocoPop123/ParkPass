@@ -49,6 +49,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Padding(
@@ -56,10 +58,10 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            Text(
               "My Tickets",
               style: TextStyle(
-                color: Colors.white,
+                color: colors.textPrimary,
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
@@ -67,12 +69,12 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
             const SizedBox(height: 20),
             Expanded(
               child: isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : myBookings.isEmpty
-                      ? const Center(
+                      ? Center(
                           child: Text(
                             "You haven't booked any trips yet.",
-                            style: TextStyle(color: Colors.white70, fontSize: 16),
+                            style: TextStyle(color: colors.textSecondary, fontSize: 16),
                           ),
                         )
                       : ListView.builder(
@@ -109,20 +111,22 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                         Row(
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              "${route['origin']} → ${route['destination']}",
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
+                                            Expanded(
+                                              child: Text(
+                                                "${route['origin']} → ${route['destination']}",
+                                                style: TextStyle(
+                                                  color: colors.textPrimary,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
                                               ),
                                             ),
                                             Container(
                                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                                               decoration: BoxDecoration(
                                                 color: booking['status'] == 'confirmed'
-                                                    ? Colors.green.withValues(alpha: 0.2)
-                                                    : Colors.orange.withValues(alpha: 0.2),
+                                                    ? Colors.green.withValues(alpha: 0.15)
+                                                    : Colors.orange.withValues(alpha: 0.15),
                                                 borderRadius: BorderRadius.circular(8),
                                                 border: Border.all(
                                                   color: booking['status'] == 'confirmed'
@@ -134,8 +138,8 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                                 (booking['status'] ?? 'confirmed').toUpperCase(),
                                                 style: TextStyle(
                                                   color: booking['status'] == 'confirmed'
-                                                      ? Colors.greenAccent
-                                                      : Colors.orangeAccent,
+                                                      ? Colors.green
+                                                      : Colors.orange,
                                                   fontSize: 10,
                                                   fontWeight: FontWeight.bold,
                                                 ),
@@ -148,9 +152,9 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text("Date: $formattedDate",
-                                                style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                                                style: TextStyle(color: colors.textSecondary, fontSize: 13)),
                                             Text("Seat: ${booking['seat_number']}",
-                                                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                                                style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold)),
                                           ],
                                         ),
                                         const SizedBox(height: 8),
@@ -158,11 +162,11 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
                                             Text("Bus Class: ${trip['bus_class']}",
-                                                style: const TextStyle(color: Colors.white60, fontSize: 12)),
-                                            const Text(
+                                                style: TextStyle(color: colors.textSecondary.withValues(alpha: 0.8), fontSize: 12)),
+                                            Text(
                                               "Tap to view QR Code →",
                                               style: TextStyle(
-                                                  color: Color(0xFF2F80ED), fontSize: 12, fontWeight: FontWeight.bold),
+                                                  color: colors.accent, fontSize: 12, fontWeight: FontWeight.bold),
                                             ),
                                           ],
                                         ),

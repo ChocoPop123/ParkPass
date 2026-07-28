@@ -16,8 +16,8 @@ class TripService {
     final data = await supabase
         .from('routes')
         .insert({
-      'origin': origin,
-      'destination': destination,
+      'origin': origin.trim(),
+      'destination': destination.trim(),
       'base_fare': baseFare,
       'cargo_price_per_kg': cargoPricePerKg,
       'created_by': supabase.auth.currentUser!.id,
@@ -29,8 +29,12 @@ class TripService {
     return RouteModel.fromMap(data);
   }
 
-  Future<List<RouteModel>> getAllRoutes() async {
-    final data = await supabase.from('routes').select();
+  Future<List<RouteModel>> getAllRoutes({String? companyId}) async {
+    var query = supabase.from('routes').select();
+    if (companyId != null) {
+      query = query.eq('company_id', companyId);
+    }
+    final data = await query.order('origin');
     return (data as List).map((r) => RouteModel.fromMap(r)).toList();
   }
 
@@ -59,12 +63,14 @@ class TripService {
       'driver_name': driverName,
       'driver_contact': driverContact,
       'fare_override': fareOverride,
+      'status': 'scheduled',
     })
         .select()
         .single();
 
     final trip = TripModel.fromMap(tripData);
 
+    // Create seat records for the trip
     final seatRows = List.generate(
       seatCount,
           (index) => {
@@ -121,12 +127,11 @@ class TripService {
     return (data as List).map((b) => BookingModel.fromMap(b)).toList();
   }
 
-  // Fetches trips joined with their route info (origin, destination, base fare)
-  // so the UI can show the route name and compute the effective fare.
-  Future<List<TripModel>> getTripsForConductor() async {
+  Future<List<TripModel>> getTripsForConductor(String companyId) async {
     final data = await supabase
         .from('trips')
-        .select('*, routes(origin, destination, base_fare)')
+        .select('*, routes!inner(origin, destination, base_fare, company_id)')
+        .eq('routes.company_id', companyId)
         .order('departure_time');
     return (data as List).map((t) => TripModel.fromMap(t)).toList();
   }
@@ -144,8 +149,6 @@ class TripService {
     return (data as List).length;
   }
 
-  // Fetches trips matching the selected route and optional date criteria,
-  // ensuring users only see future departures even for today's date.
   Future<List<Map<String, dynamic>>> searchTrips({
     required String origin,
     required String destination,
@@ -158,20 +161,22 @@ class TripService {
           routes!inner(
             origin,
             destination,
-            base_fare
+            base_fare,
+            companies(name)
           )
         ''')
-        .eq('routes.origin', origin)
-        .eq('routes.destination', destination);
+        .ilike('routes.origin', origin.trim())
+        .ilike('routes.destination', destination.trim());
+
+    // Allow scheduled or null status (null = migration legacy)
+    query = query.or('status.eq.scheduled,status.is.null');
 
     if (date != null) {
-      final now = DateTime.now();
-
-      // If the selected date is today, start searching from right NOW.
-      // Otherwise, start from 00:00 of the selected date.
-      final isToday = date.year == now.year && date.month == now.month && date.day == now.day;
+      final nowBuffer = DateTime.now().subtract(const Duration(minutes: 5));
+      final isToday = date.year == nowBuffer.year && date.month == nowBuffer.month && date.day == nowBuffer.day;
+      
       final startSearchTime = isToday
-          ? now.toIso8601String()
+          ? nowBuffer.toIso8601String()
           : DateTime(date.year, date.month, date.day).toIso8601String();
 
       final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59).toIso8601String();
@@ -180,8 +185,8 @@ class TripService {
           .gte('departure_time', startSearchTime)
           .lte('departure_time', endOfDay);
     } else {
-      final now = DateTime.now().toIso8601String();
-      query = query.gte('departure_time', now);
+      final nowBuffer = DateTime.now().subtract(const Duration(minutes: 5)).toIso8601String();
+      query = query.gte('departure_time', nowBuffer);
     }
 
     final data = await query.order('departure_time');

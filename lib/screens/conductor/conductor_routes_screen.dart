@@ -5,7 +5,8 @@ import '../../widgets/glass_widgets.dart';
 import 'create_route_screen.dart';
 
 class ConductorRoutesScreen extends StatefulWidget {
-  const ConductorRoutesScreen({super.key});
+  final String? companyId;
+  const ConductorRoutesScreen({super.key, this.companyId});
 
   @override
   State<ConductorRoutesScreen> createState() => _ConductorRoutesScreenState();
@@ -25,7 +26,7 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
   Future<void> _load() async {
     setState(() => _isLoading = true);
     try {
-      final routes = await _tripService.getAllRoutes();
+      final routes = await _tripService.getAllRoutes(companyId: widget.companyId);
       setState(() {
         _routes = routes;
         _isLoading = false;
@@ -67,7 +68,16 @@ class _ConductorRoutesScreenState extends State<ConductorRoutesScreen> {
               child: _isLoading
                   ? Center(child: CircularProgressIndicator(color: colors.accent))
                   : _routes.isEmpty
-                  ? Center(child: Text('No routes yet.', style: TextStyle(color: colors.textSecondary)))
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.alt_route, color: colors.textSecondary.withValues(alpha: 0.3), size: 48),
+                          const SizedBox(height: 16),
+                          Text('No routes yet.', style: TextStyle(color: colors.textSecondary, fontSize: 16)),
+                        ],
+                      ),
+                    )
                   : ListView.builder(
                 itemCount: _routes.length,
                 itemBuilder: (context, index) {

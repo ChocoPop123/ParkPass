@@ -26,7 +26,7 @@ class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: const Color(0xFF2563EB).withOpacity(0.33), width: 1.3),
+        side: BorderSide(color: const Color(0xFF2563EB).withValues(alpha: 0.33), width: 1.3),
       ),
     ),
 
@@ -50,11 +50,11 @@ class AppTheme {
       filled: false,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: const Color(0xFF2563EB).withOpacity(0.33)),
+        borderSide: BorderSide(color: const Color(0xFF2563EB).withValues(alpha: 0.33)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: const Color(0xFF2563EB).withOpacity(0.33)),
+        borderSide: BorderSide(color: const Color(0xFF2563EB).withValues(alpha: 0.33)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
@@ -91,7 +91,7 @@ class AppTheme {
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: const Color(0xFF3B82F6).withOpacity(0.4), width: 1.3),
+        side: BorderSide(color: const Color(0xFF3B82F6).withValues(alpha: 0.4), width: 1.3),
       ),
     ),
 
@@ -110,11 +110,11 @@ class AppTheme {
       filled: false,
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
       ),
       enabledBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.white.withOpacity(0.12)),
+        borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.12)),
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),

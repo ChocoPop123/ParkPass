@@ -57,6 +57,8 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AuthBackground(
@@ -64,12 +66,12 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
           child: Padding(
             padding: const EdgeInsets.all(24),
             child: isLoading
-                ? const Center(child: CircularProgressIndicator())
+                ? Center(child: CircularProgressIndicator(color: colors.accent))
                 : ticketData == null
-                ? const Center(
+                ? Center(
               child: Text(
                 "Ticket details not found.",
-                style: TextStyle(color: Colors.white70),
+                style: TextStyle(color: colors.textSecondary),
               ),
             )
                 : SingleChildScrollView(
@@ -82,19 +84,19 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                     size: 64,
                   ),
                   const SizedBox(height: 12),
-                  const Text(
+                  Text(
                     "Booking Successful!",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colors.textPrimary,
                       fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
+                  Text(
                     "Your ticket has been generated and confirmed.",
                     style: TextStyle(
-                      color: Colors.white70,
+                      color: colors.textSecondary,
                       fontSize: 14,
                     ),
                     textAlign: TextAlign.center,
@@ -110,15 +112,15 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                           // Route Header
                           Text(
                             "${ticketData!['trips']['routes']['origin']} → ${ticketData!['trips']['routes']['destination']}",
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.textPrimary,
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 20),
-                          const Divider(color: Colors.white24),
+                          Divider(color: colors.neutralBorder),
                           const SizedBox(height: 20),
 
                           // Details Row 1
@@ -127,6 +129,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                             ticketData!['trips']['bus_class'] ?? 'Ordinary',
                             "Number Plate",
                             ticketData!['trips']['bus_number_plate'] ?? 'N/A',
+                            colors,
                           ),
                           const SizedBox(height: 16),
 
@@ -136,6 +139,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                             widget.seatLabel,
                             "Amount Paid",
                             "UGX ${ticketData!['amount_paid']}",
+                            colors,
                           ),
                           const SizedBox(height: 16),
 
@@ -147,6 +151,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                             ),
                             "Status",
                             ticketData!['status'].toUpperCase(),
+                            colors,
                           ),
 
                           const SizedBox(height: 30),
@@ -157,6 +162,13 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 10,
+                                  spreadRadius: 2,
+                                ),
+                              ],
                             ),
                             child: QrImageView(
                               data: widget.bookingId,
@@ -165,10 +177,10 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          const Text(
+                          Text(
                             "Show this QR code to the conductor at boarding",
                             style: TextStyle(
-                              color: Colors.white60,
+                              color: colors.textSecondary,
                               fontSize: 12,
                             ),
                             textAlign: TextAlign.center,
@@ -201,24 +213,24 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
     );
   }
 
-  Widget _buildDetailRow(String label1, String val1, String label2, String val2) {
+  Widget _buildDetailRow(String label1, String val1, String label2, String val2, AppColors colors) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(label1, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            Text(label1, style: TextStyle(color: colors.textSecondary.withValues(alpha: 0.6), fontSize: 12)),
             const SizedBox(height: 2),
-            Text(val1, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(val1, style: TextStyle(color: colors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600)),
           ],
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            Text(label2, style: const TextStyle(color: Colors.white54, fontSize: 12)),
+            Text(label2, style: TextStyle(color: colors.textSecondary.withValues(alpha: 0.6), fontSize: 12)),
             const SizedBox(height: 2),
-            Text(val2, style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600)),
+            Text(val2, style: TextStyle(color: colors.textPrimary, fontSize: 15, fontWeight: FontWeight.w600)),
           ],
         ),
       ],

@@ -6,7 +6,8 @@ import 'create_trip_screen.dart';
 import 'trip_detail_screen.dart';
 
 class ConductorTripsScreen extends StatefulWidget {
-  const ConductorTripsScreen({super.key});
+  final String? companyId;
+  const ConductorTripsScreen({super.key, this.companyId});
 
   @override
   State<ConductorTripsScreen> createState() => _ConductorTripsScreenState();
@@ -25,12 +26,20 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
   }
 
   Future<void> _load() async {
+    if (widget.companyId == null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'No company ID found.';
+      });
+      return;
+    }
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
     try {
-      final trips = await _tripService.getTripsForConductor();
+      final trips = await _tripService.getTripsForConductor(widget.companyId!);
       setState(() {
         _trips = trips;
         _isLoading = false;
@@ -77,7 +86,16 @@ class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
                   : _errorMessage != null
                   ? Center(child: Text(_errorMessage!, style: TextStyle(color: colors.textSecondary)))
                   : _trips.isEmpty
-                  ? Center(child: Text('No trips yet.', style: TextStyle(color: colors.textSecondary)))
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.directions_bus, color: colors.textSecondary.withValues(alpha: 0.3), size: 48),
+                          const SizedBox(height: 16),
+                          Text('No trips yet.', style: TextStyle(color: colors.textSecondary, fontSize: 16)),
+                        ],
+                      ),
+                    )
                   : ListView.builder(
                 itemCount: _trips.length,
                 itemBuilder: (context, index) {

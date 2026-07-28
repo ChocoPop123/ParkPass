@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/company_model.dart';
 
@@ -90,13 +90,15 @@ class CompanyService {
     return CompanyModel.fromMap(data);
   }
 
-  Future<String> uploadLogo(String companyId, File imageFile) async {
-    final fileExt = imageFile.path.split('.').last;
+  Future<String> uploadLogo(String companyId, XFile imageFile) async {
+    final fileExt = imageFile.name.split('.').last;
     final filePath = '$companyId/logo.$fileExt';
 
-    await supabase.storage.from('company-logos').upload(
+    final bytes = await imageFile.readAsBytes();
+
+    await supabase.storage.from('company-logos').uploadBinary(
       filePath,
-      imageFile,
+      bytes,
       fileOptions: const FileOptions(upsert: true),
     );
 

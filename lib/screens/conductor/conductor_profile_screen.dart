@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -61,7 +60,7 @@ class _ConductorProfileScreenState extends State<ConductorProfileScreen> {
 
     setState(() => _isUploadingAvatar = true);
     try {
-      final url = await _profileService.uploadAvatar(File(picked.path));
+      final url = await _profileService.uploadAvatar(picked);
       setState(() => _avatarUrl = url);
     } catch (e) {
       setState(() => _message = 'Could not upload photo: $e');

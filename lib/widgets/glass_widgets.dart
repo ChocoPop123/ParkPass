@@ -1,15 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// ============================================================
-/// FINAL THEME — flat, bordered "outline glass" in a single blue
-/// accent. No green, no blur, no shadows. Light/dark are mirror
-/// images of each other (black<->white swap) with blue held constant.
-///
-/// Reads Theme.of(context).brightness, so wire light/dark by
-/// setting MaterialApp's theme/darkTheme/themeMode as usual —
-/// these widgets follow automatically, no extra plumbing needed.
-/// ============================================================
-
 class AppColors {
   final Color background;
   final Color surface;
@@ -43,14 +33,14 @@ class AppColors {
   }
 
   static const light = AppColors(
-    background: Color(0xFFF2F2F3),
+    background: Color(0xFFE5E7EB),
     surface: Colors.white,
-    border: Color(0x552563EB),
-    neutralBorder: Color(0x1F0A0A0A),
-    textPrimary: Color(0xFF0A0A0A),
-    textSecondary: Color(0xA60A0A0A),
+    border: Color(0x662563EB),
+    neutralBorder: Color(0x260A0A0A),
+    textPrimary: Color(0xFF111827),
+    textSecondary: Color(0xFF4B5563),
     accent: Color(0xFF2563EB),
-    avatarFill: Color(0xFF0A0A0A),
+    avatarFill: Color(0xFF111827),
     avatarText: Colors.white,
     buttonText: Colors.white,
     danger: Color(0xFFDC2626),
@@ -71,14 +61,9 @@ class AppColors {
   );
 }
 
-@Deprecated('Use AppColors.of(context).accent')
-const kAuthAccentMint = Color(0xFF3B82F6);
-@Deprecated('Use AppColors.of(context).accent')
-const kAuthAccentGreen = Color(0xFF3B82F6);
-@Deprecated('Use AppColors.of(context).accent')
 const kAuthAccentBlue = Color(0xFF3B82F6);
-@Deprecated('Use AppColors.of(context).accent')
 const kAuthAccentSkyBlue = Color(0xFF2563EB);
+const kAuthAccentMint = Color(0xFF34D399);
 
 class AuthBackground extends StatelessWidget {
   final Widget child;
@@ -105,7 +90,7 @@ class GlassCard extends StatelessWidget {
       width: 340,
       padding: const EdgeInsets.fromLTRB(28, 32, 28, 28),
       decoration: BoxDecoration(
-        color: colors.accent.withOpacity(0.06),
+        color: colors.surface,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(color: colors.border, width: 1.3),
       ),
@@ -180,10 +165,9 @@ class GlassTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? colors.surface.withOpacity(0.04) : colors.surface,
+        color: colors.surface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: colors.neutralBorder),
       ),
@@ -192,21 +176,13 @@ class GlassTextField extends StatelessWidget {
         obscureText: obscureText,
         keyboardType: keyboardType,
         validator: validator,
-        autofillHints: null,
-        enableSuggestions: false,
-        autocorrect: false,
         style: TextStyle(color: colors.textPrimary, fontSize: 14),
         cursorColor: colors.accent,
         decoration: InputDecoration(
-          filled: false,
-          fillColor: Colors.transparent,
           hintText: hint,
-          hintStyle: TextStyle(color: colors.textSecondary.withOpacity(0.6)),
+          hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.5)),
           border: InputBorder.none,
-          errorBorder: InputBorder.none,
-          focusedErrorBorder: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-          errorStyle: TextStyle(color: colors.danger, fontSize: 11),
           suffixIcon: suffixIcon ??
               (suffixDot
                   ? Padding(
@@ -214,7 +190,6 @@ class GlassTextField extends StatelessWidget {
                 child: Icon(Icons.circle, color: colors.accent, size: 8),
               )
                   : null),
-          suffixIconConstraints: const BoxConstraints(minWidth: 0, minHeight: 0),
         ),
       ),
     );
@@ -281,9 +256,9 @@ class AuthErrorText extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: colors.danger.withOpacity(0.1),
+          color: colors.danger.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: colors.danger.withOpacity(0.35)),
+          border: Border.all(color: colors.danger.withValues(alpha: 0.35)),
         ),
         child: Text(
           message,
@@ -430,7 +405,7 @@ class GlassIconAction extends StatelessWidget {
         height: 34,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          border: Border.all(color: color.withOpacity(0.5)),
+          border: Border.all(color: color.withValues(alpha: 0.5)),
         ),
         child: Icon(icon, color: color, size: 16),
       ),
@@ -444,10 +419,10 @@ class GlassSelectorChip extends StatelessWidget {
   final VoidCallback onTap;
 
   const GlassSelectorChip({
-    super.key,
     required this.icon,
     required this.label,
     required this.onTap,
+    super.key,
   });
 
   @override

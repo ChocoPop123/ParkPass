@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -103,7 +102,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
 
     setState(() => _isUploadingLogo = true);
     try {
-      final url = await _companyService.uploadLogo(widget.companyId, File(picked.path));
+      final url = await _companyService.uploadLogo(widget.companyId, picked);
       setState(() => _logoUrl = url);
     } catch (e) {
       setState(() => _message = 'Could not upload logo: $e');
@@ -178,7 +177,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           children: [
                             CircleAvatar(
                               radius: 44,
-                              backgroundColor: colors.accent.withOpacity(0.1),
+                              backgroundColor: colors.accent.withValues(alpha: 0.1),
                               backgroundImage: _logoUrl != null ? NetworkImage(_logoUrl!) : null,
                               child: _isUploadingLogo
                                   ? CircularProgressIndicator(color: colors.accent)
@@ -219,7 +218,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           builder: (context, mode, _) {
                             return Switch(
                               value: mode == ThemeMode.dark,
-                              activeColor: colors.accent,
+                              activeThumbColor: colors.accent,
                               onChanged: (v) => ThemeModeController.instance.setDark(v),
                             );
                           },

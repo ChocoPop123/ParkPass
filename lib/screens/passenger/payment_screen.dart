@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/glass_widgets.dart';
-import 'ticket_confirmation_screen.dart'; // We will create this next for the QR code
+import 'ticket_confirmation_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
   final String tripId;
@@ -91,6 +91,8 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AuthBackground(
@@ -106,16 +108,16 @@ class _PaymentScreenState extends State<PaymentScreen> {
                     children: [
                       IconButton(
                         onPressed: () => Navigator.pop(context),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.arrow_back_ios_new_rounded,
-                          color: Colors.white,
+                          color: colors.textPrimary,
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const Text(
+                      Text(
                         "Checkout",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: colors.textPrimary,
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
                         ),
@@ -131,24 +133,24 @@ class _PaymentScreenState extends State<PaymentScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "Booking Summary",
-                            style: TextStyle(color: Colors.white70, fontSize: 14),
+                            style: TextStyle(color: colors.textSecondary, fontSize: 14),
                           ),
                           const SizedBox(height: 12),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("Selected Seat:", style: TextStyle(color: Colors.white)),
-                              Text("Seat ${widget.seatLabel}", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                              Text("Selected Seat:", style: TextStyle(color: colors.textPrimary)),
+                              Text("Seat ${widget.seatLabel}", style: TextStyle(color: colors.textPrimary, fontWeight: FontWeight.bold)),
                             ],
                           ),
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text("Total Fare:", style: TextStyle(color: Colors.white)),
-                              Text("UGX ${widget.amount}", style: const TextStyle(color: Color(0xFF2F80ED), fontSize: 18, fontWeight: FontWeight.bold)),
+                              Text("Total Fare:", style: TextStyle(color: colors.textPrimary)),
+                              Text("UGX ${widget.amount}", style: TextStyle(color: colors.accent, fontSize: 18, fontWeight: FontWeight.bold)),
                             ],
                           ),
                         ],
@@ -158,9 +160,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
 
                   const SizedBox(height: 24),
 
-                  const Text(
+                  Text(
                     "Select Payment Method",
-                    style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: colors.textPrimary, fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
@@ -173,12 +175,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: paymentMethod == 'mobile_money' ? const Color(0xFF2F80ED) : Colors.white.withValues(alpha: 0.06),
+                              color: paymentMethod == 'mobile_money' ? colors.accent : colors.surface.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                              border: Border.all(color: paymentMethod == 'mobile_money' ? colors.accent : colors.border),
                             ),
                             alignment: Alignment.center,
-                            child: const Text("Mobile Money", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            child: Text(
+                                "Mobile Money", 
+                                style: TextStyle(
+                                    color: paymentMethod == 'mobile_money' ? colors.buttonText : colors.textSecondary, 
+                                    fontWeight: FontWeight.bold
+                                )
+                            ),
                           ),
                         ),
                       ),
@@ -189,12 +197,18 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
-                              color: paymentMethod == 'card' ? const Color(0xFF2F80ED) : Colors.white.withValues(alpha: 0.06),
+                              color: paymentMethod == 'card' ? colors.accent : colors.surface.withValues(alpha: 0.5),
                               borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+                              border: Border.all(color: paymentMethod == 'card' ? colors.accent : colors.border),
                             ),
                             alignment: Alignment.center,
-                            child: const Text("Bank Card", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            child: Text(
+                                "Bank Card", 
+                                style: TextStyle(
+                                    color: paymentMethod == 'card' ? colors.buttonText : colors.textSecondary, 
+                                    fontWeight: FontWeight.bold
+                                )
+                            ),
                           ),
                         ),
                       ),
@@ -211,7 +225,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Choose Network", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          Text("Choose Network", style: TextStyle(color: colors.textSecondary, fontSize: 14)),
                           const SizedBox(height: 10),
                           Row(
                             children: [
@@ -229,18 +243,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          const Text("Phone Number", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          Text("Phone Number", style: TextStyle(color: colors.textSecondary, fontSize: 14)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: colors.textPrimary),
                             decoration: InputDecoration(
                               hintText: "077XXXXXXX / 070XXXXXXX",
-                              hintStyle: const TextStyle(color: Colors.white38),
+                              hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.4)),
                               filled: true,
-                              fillColor: Colors.white.withValues(alpha: 0.06),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              fillColor: colors.surface.withValues(alpha: 0.5),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: colors.neutralBorder)),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: colors.neutralBorder)),
                             ),
                           ),
                         ],
@@ -248,18 +263,19 @@ class _PaymentScreenState extends State<PaymentScreen> {
                           : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text("Card Details", style: TextStyle(color: Colors.white70, fontSize: 14)),
+                          Text("Card Details", style: TextStyle(color: colors.textSecondary, fontSize: 14)),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _cardController,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Colors.white),
+                            style: TextStyle(color: colors.textPrimary),
                             decoration: InputDecoration(
                               hintText: "XXXX XXXX XXXX XXXX",
-                              hintStyle: const TextStyle(color: Colors.white38),
+                              hintStyle: TextStyle(color: colors.textSecondary.withValues(alpha: 0.4)),
                               filled: true,
-                              fillColor: Colors.white.withValues(alpha: 0.06),
-                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                              fillColor: colors.surface.withValues(alpha: 0.5),
+                              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: colors.neutralBorder)),
+                              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: colors.neutralBorder)),
                             ),
                           ),
                         ],

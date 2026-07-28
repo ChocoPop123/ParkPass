@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../theme/theme_mode_controller.dart';
 import '../auth/login_screen.dart';
 
 class PassengerProfileScreen extends StatefulWidget {
@@ -64,6 +65,8 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Padding(
@@ -73,10 +76,10 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
             : Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "My Profile",
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colors.textPrimary,
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                     ),
@@ -90,15 +93,15 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
                           Container(
                             width: 60,
                             height: 60,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFF2F80ED),
+                            decoration: BoxDecoration(
+                              color: colors.accent,
                               shape: BoxShape.circle,
                             ),
                             alignment: Alignment.center,
                             child: Text(
                               fullName.isNotEmpty ? fullName[0].toUpperCase() : "P",
-                              style: const TextStyle(
-                                color: Colors.white,
+                              style: TextStyle(
+                                color: colors.buttonText,
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -111,8 +114,8 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
                               children: [
                                 Text(
                                   fullName,
-                                  style: const TextStyle(
-                                    color: Colors.white,
+                                  style: TextStyle(
+                                    color: colors.textPrimary,
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -120,8 +123,8 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
                                 const SizedBox(height: 4),
                                 Text(
                                   userEmail,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
+                                  style: TextStyle(
+                                    color: colors.textSecondary,
                                     fontSize: 14,
                                   ),
                                 ),
@@ -130,6 +133,34 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
                           ),
                         ],
                       ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  GlassPanel(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(Icons.dark_mode_outlined, color: colors.textSecondary),
+                            const SizedBox(width: 12),
+                            Text(
+                              "Dark Mode",
+                              style: TextStyle(color: colors.textPrimary, fontSize: 16),
+                            ),
+                          ],
+                        ),
+                        ValueListenableBuilder<ThemeMode>(
+                          valueListenable: ThemeModeController.instance,
+                          builder: (context, mode, _) {
+                            return Switch(
+                              value: mode == ThemeMode.dark,
+                              activeThumbColor: colors.accent,
+                              onChanged: (v) => ThemeModeController.instance.setDark(v),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const Spacer(),

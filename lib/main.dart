@@ -10,22 +10,40 @@ import 'screens/conductor/conductor_shell.dart';
 import 'screens/conductor/pending_approval_screen.dart';
 import 'screens/admin/admin_shell.dart';
 
-
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await Supabase.initialize(
-    url: 'https://stfmxdhrijdezwxbpxlr.supabase.co',
-    publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
-  );
-
-  await ThemeModeController.instance.load();
-
   runApp(const ParkPassApp());
 }
 
-class ParkPassApp extends StatelessWidget {
+class ParkPassApp extends StatefulWidget {
   const ParkPassApp({super.key});
+
+  @override
+  State<ParkPassApp> createState() => _ParkPassAppState();
+}
+
+class _ParkPassAppState extends State<ParkPassApp> {
+  bool _ready = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _boot();
+  }
+
+  Future<void> _boot() async {
+    try {
+      await Supabase.initialize(
+        url: 'https://stfmxdhrijdezwxbpxlr.supabase.co',
+        publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
+      );
+      await ThemeModeController.instance.load();
+      if (mounted) setState(() => _ready = true);
+    } catch (e) {
+      if (mounted) setState(() => _error = e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,24 +52,33 @@ class ParkPassApp extends StatelessWidget {
       builder: (context, mode, _) {
         return MaterialApp(
           title: 'ParkPass',
+          debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
-          darkTheme: ThemeData(
-            brightness: Brightness.dark,
-            scaffoldBackgroundColor: const Color(0xFF0B0B0F),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF3B82F6),
-              brightness: Brightness.dark,
-            ),
-          ),
+          darkTheme: AppTheme.darkTheme,
           themeMode: mode,
-          home: const AuthGate(),
+          // Using a simple Scaffold for the home to ensure something renders immediately
+          home: _buildHome(),
         );
       },
     );
   }
+
+  Widget _buildHome() {
+    if (_error != null) {
+      return Scaffold(
+        body: Center(child: Text('Fatal Error: $_error', style: const TextStyle(color: Colors.red))),
+      );
+    }
+    if (!_ready) {
+      return const Scaffold(
+        backgroundColor: Colors.white,
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    return const AuthGate();
+  }
 }
 
-// This widget decides what to show based on login state.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
@@ -69,30 +96,6 @@ class AuthGate extends StatelessWidget {
             if (profileSnapshot.connectionState == ConnectionState.waiting) {
               return const Scaffold(
                 body: Center(child: CircularProgressIndicator()),
-              );
-            }
-
-            if (profileSnapshot.hasError) {
-              return Scaffold(
-                body: Center(
-                  child: Text(
-                    profileSnapshot.error.toString(),
-                  ),
-                ),
-              );
-            }
-
-            if (profileSnapshot.hasError) {
-              return Scaffold(
-                body: Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text(
-                      'Error loading profile: ${profileSnapshot.error}',
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ),
               );
             }
 

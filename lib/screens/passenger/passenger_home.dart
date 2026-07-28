@@ -22,8 +22,10 @@ class _PassengerHomeState extends State<PassengerHome> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    
     return Scaffold(
-      backgroundColor: const Color(0xFF0E1A1B),
+      backgroundColor: colors.background,
       body: AuthBackground(
         child: IndexedStack(
           index: _currentIndex,
@@ -32,9 +34,9 @@ class _PassengerHomeState extends State<PassengerHome> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF14142B),
+          color: colors.surface,
           border: Border(
-            top: BorderSide(color: Colors.white.withValues(alpha: 0.1), width: 1),
+            top: BorderSide(color: colors.neutralBorder, width: 1),
           ),
         ),
         child: BottomNavigationBar(
@@ -46,8 +48,8 @@ class _PassengerHomeState extends State<PassengerHome> {
           },
           backgroundColor: Colors.transparent,
           elevation: 0,
-          selectedItemColor: const Color(0xFF2F80ED),
-          unselectedItemColor: Colors.white60,
+          selectedItemColor: colors.accent,
+          unselectedItemColor: colors.textSecondary.withValues(alpha: 0.6),
           type: BottomNavigationBarType.fixed,
           items: const [
             BottomNavigationBarItem(

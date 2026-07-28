@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../widgets/app_logo.dart';
 import 'login_screen.dart';
 import '../../models/company_model.dart';
 import '../../services/company_service.dart';
@@ -118,6 +119,10 @@ class _SignupScreenState extends State<SignupScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    const Center(
+                      child: AppLogo(size: 80),
+                    ),
+                    const SizedBox(height: 24),
                     Center(
                       child: Text(
                         'Create Account',

@@ -74,6 +74,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     return Scaffold(
+      backgroundColor: Colors.transparent,
       body: AuthBackground(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
@@ -83,7 +84,7 @@ class _CreateRouteScreenState extends State<CreateRouteScreen> {
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back, color: colors.textSecondary),
+                    icon: Icon(Icons.arrow_back, color: colors.textPrimary),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Text('Create Route',
