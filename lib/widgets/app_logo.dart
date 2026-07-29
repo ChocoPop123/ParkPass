@@ -16,7 +16,7 @@ class AppLogo extends StatelessWidget {
     final colors = AppColors.of(context);
     
     return Container(
-      decoration : BoxDecoration(
+      decoration: BoxDecoration(
         borderRadius : BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
@@ -27,12 +27,12 @@ class AppLogo extends StatelessWidget {
         ],
       ),
       child : ClipRRect(
-        borderRadius : BorderRadius.circular(borderRadius),
-        child : Image.asset(
+        borderRadius: BorderRadius.circular(borderRadius),
+        child: Image.asset(
           'assets/app_icon.png',
-          width  : size,
-          height : size,
-          fit    : BoxFit.cover,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
         ),
       ),
     );
