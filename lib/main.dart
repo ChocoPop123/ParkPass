@@ -36,7 +36,7 @@ class _ParkPassAppState extends State<ParkPassApp> {
     try {
       await Supabase.initialize(
         url: 'https://stfmxdhrijdezwxbpxlr.supabase.co',
-        publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_uaXXXXXXX', // paste your full key here
+        publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
       );
       await ThemeModeController.instance.load();
       if (mounted) setState(() => _ready = true);
