@@ -47,22 +47,10 @@ class _ParkPassAppState extends State<ParkPassApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (_error != null) {
-      return MaterialApp(
-        home: Scaffold(
-          body: Center(child: Text('Startup error: $_error')),
-        ),
-      );
-    }
-
-    if (!_ready) {
-      return const MaterialApp(
-        home: Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-      );
-    }
-
+    return MaterialApp(
+      title: 'ParkPass',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const AuthGate(),
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: ThemeModeController.instance,
       builder: (context, mode, _) {
@@ -72,7 +60,8 @@ class _ParkPassAppState extends State<ParkPassApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: mode,
-          home: const AuthGate(),
+          // Using a simple Scaffold for the home to ensure something renders immediately
+          home: _buildHome(),
         );
       },
     );
