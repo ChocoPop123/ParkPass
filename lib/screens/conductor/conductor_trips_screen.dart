@@ -1,0 +1,127 @@
+import 'package:flutter/material.dart';
+import '../../models/trip_model.dart';
+import '../../services/trip_service.dart';
+import '../../widgets/glass_widgets.dart';
+import 'create_trip_screen.dart';
+import 'trip_detail_screen.dart';
+
+class ConductorTripsScreen extends StatefulWidget {
+  final String? companyId;
+  const ConductorTripsScreen({super.key, this.companyId});
+
+  @override
+  State<ConductorTripsScreen> createState() => _ConductorTripsScreenState();
+}
+
+class _ConductorTripsScreenState extends State<ConductorTripsScreen> {
+  final _tripService = TripService();
+  List<TripModel> _trips = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    if (widget.companyId == null) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'No company ID found.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final trips = await _tripService.getTripsForConductor(widget.companyId!);
+      setState(() {
+        _trips = trips;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = 'Could not load trips: $e';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = AppColors.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Trips', style: TextStyle(color: colors.textPrimary, fontSize: 22, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 16),
+          GestureDetector(
+            onTap: () async {
+              await Navigator.push(context, MaterialPageRoute(builder: (_) => const CreateTripScreen()));
+              _load();
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: colors.accent,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Center(
+                child: Text('+ New Trip', style: TextStyle(color: colors.buttonText, fontWeight: FontWeight.w600)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: GlassPanel(
+              child: _isLoading
+                  ? Center(child: CircularProgressIndicator(color: colors.accent))
+                  : _errorMessage != null
+                  ? Center(child: Text(_errorMessage!, style: TextStyle(color: colors.textSecondary)))
+                  : _trips.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.directions_bus, color: colors.textSecondary.withValues(alpha: 0.3), size: 48),
+                          const SizedBox(height: 16),
+                          Text('No trips yet.', style: TextStyle(color: colors.textSecondary, fontSize: 16)),
+                        ],
+                      ),
+                    )
+                  : ListView.builder(
+                itemCount: _trips.length,
+                itemBuilder: (context, index) {
+                  final trip = _trips[index];
+                  final routeLabel = trip.routeOrigin != null
+                      ? '${trip.routeOrigin} \u2192 ${trip.routeDestination}'
+                      : 'Route';
+                  return GlassListRow(
+                    icon: Icons.directions_bus,
+                    title: routeLabel,
+                    subtitle:
+                    '${trip.departureTime.toString().substring(0, 16)} \u00b7 ${trip.busClass} \u00b7 ${trip.displayStatus}',
+                    onTap: () async {
+                      final changed = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => TripDetailScreen(trip: trip)),
+                      );
+                      if (changed == true) _load();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
