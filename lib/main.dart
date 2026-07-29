@@ -26,7 +26,7 @@ class ParkPassApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'ParkPass',
+      title : 'ParkPass',
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const AuthGate(),
     );
