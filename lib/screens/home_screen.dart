@@ -6,11 +6,11 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ParkPass'),
+      appBar : AppBar(
+        title : const Text('ParkPass'),
       ),
-      body: const Center(
-        child: Text(
+      body : const Center(
+        child : Text(
           'Welcome to ParkPass',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
