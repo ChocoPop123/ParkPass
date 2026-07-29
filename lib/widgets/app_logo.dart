@@ -16,8 +16,8 @@ class AppLogo extends StatelessWidget {
     final colors = AppColors.of(context);
     
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(borderRadius),
+      decoration : BoxDecoration(
+        borderRadius : BorderRadius.circular(borderRadius),
         boxShadow: [
           BoxShadow(
             color: colors.accent.withValues(alpha: 0.2),
