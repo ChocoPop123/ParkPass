@@ -51,13 +51,13 @@ class _CompanyPickerContentState extends State<_CompanyPickerContent> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: Container(
-        height: MediaQuery.of(context).size.height * 0.65,
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
-        decoration: const BoxDecoration(
-          color: Color(0xFF11201F),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      padding : EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+      child : Container(
+        height : MediaQuery.of(context).size.height * 0.65,
+        padding : const EdgeInsets.fromLTRB(20, 20, 20, 20),
+        decoration : const BoxDecoration(
+          color : Color(0xFF11201F),
+          borderRadius : BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

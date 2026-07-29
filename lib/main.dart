@@ -47,38 +47,33 @@ class _ParkPassAppState extends State<ParkPassApp> {
 
   @override
   Widget build(BuildContext context) {
+    return MaterialApp(
+      title : 'ParkPass',
+      theme : ThemeData(primarySwatch: Colors.blue),
+      home  : const AuthGate(),
     return ValueListenableBuilder<ThemeMode>(
-      valueListenable: ThemeModeController.instance,
-      builder: (context, mode, _) {
+      valueListenable : ThemeModeController.instance,
+      builder         : (context, mode, _) {
         return MaterialApp(
           title: 'ParkPass',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
-          darkTheme: AppTheme.darkTheme,
-          themeMode: mode,
+          theme     : AppTheme.lightTheme,
+          darkTheme : AppTheme.darkTheme,
+          themeMode : mode,
           // Using a simple Scaffold for the home to ensure something renders immediately
-          home: _buildHome(),
+          home      : _buildHome(),
         );
       },
     );
-  }
-
-  Widget _buildHome() {
-    if (_error != null) {
-      return Scaffold(
-        body: Center(child: Text('Fatal Error: $_error', style: const TextStyle(color: Colors.red))),
-      );
-    }
-    if (!_ready) {
-      return const Scaffold(
-        backgroundColor: Colors.white,
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
-    return const AuthGate();
+    return MaterialApp(
+      title : 'ParkPass',
+      theme : ThemeData(primarySwatch: Colors.blue),
+      home : const AuthGate(),
+    );
   }
 }
 
+// This widget decides what to show based on login state.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
 
