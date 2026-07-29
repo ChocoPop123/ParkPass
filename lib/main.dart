@@ -66,9 +66,9 @@ class _ParkPassAppState extends State<ParkPassApp> {
       },
     );
     return MaterialApp(
-      title: 'ParkPass',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const AuthGate(),
+      title : 'ParkPass',
+      theme : ThemeData(primarySwatch: Colors.blue),
+      home : const AuthGate(),
     );
   }
 }
