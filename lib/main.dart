@@ -57,11 +57,11 @@ class _ParkPassAppState extends State<ParkPassApp> {
         return MaterialApp(
           title: 'ParkPass',
           debugShowCheckedModeBanner: false,
-          theme: AppTheme.lightTheme,
+          theme     : AppTheme.lightTheme,
           darkTheme : AppTheme.darkTheme,
           themeMode : mode,
           // Using a simple Scaffold for the home to ensure something renders immediately
-          home: _buildHome(),
+          home      : _buildHome(),
         );
       },
     );
