@@ -154,6 +154,8 @@ class TripService {
     required String destination,
     DateTime? date,
   }) async {
+    // We use .select() with routes!inner to filter by origin/destination.
+    // We also select companies to show the bus company name.
     var query = supabase
         .from('trips')
         .select('''
@@ -168,29 +170,24 @@ class TripService {
         .ilike('routes.origin', origin.trim())
         .ilike('routes.destination', destination.trim());
 
-    // Allow scheduled or null status (null = migration legacy)
-    query = query.or('status.eq.scheduled,status.is.null');
+    // Relaxed status filter: basically everything except 'cancelled' or 'departed'
+    query = query.neq('status', 'cancelled').neq('status', 'departed');
 
     if (date != null) {
-      final nowBuffer = DateTime.now().subtract(const Duration(minutes: 5));
-      final isToday = date.year == nowBuffer.year && date.month == nowBuffer.month && date.day == nowBuffer.day;
-      
-      final startSearchTime = isToday
-          ? nowBuffer.toIso8601String()
-          : DateTime(date.year, date.month, date.day).toIso8601String();
-
-      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59).toIso8601String();
+      // Create start/end of the chosen day in local time, then to ISO string
+      final startOfDay = DateTime(date.year, date.month, date.day, 0, 0, 0);
+      final endOfDay = DateTime(date.year, date.month, date.day, 23, 59, 59);
 
       query = query
-          .gte('departure_time', startSearchTime)
-          .lte('departure_time', endOfDay);
+          .gte('departure_time', startOfDay.toIso8601String())
+          .lte('departure_time', endOfDay.toIso8601String());
     } else {
-      final nowBuffer = DateTime.now().subtract(const Duration(minutes: 5)).toIso8601String();
+      // Default to showing future trips
+      final nowBuffer = DateTime.now().subtract(const Duration(minutes: 30)).toIso8601String();
       query = query.gte('departure_time', nowBuffer);
     }
 
     final data = await query.order('departure_time');
-
     return List<Map<String, dynamic>>.from(data as List);
   }
 }

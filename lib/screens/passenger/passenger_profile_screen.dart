@@ -24,6 +24,9 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
   }
 
   Future<void> _loadUserProfile() async {
+    if (!mounted) return;
+    setState(() => isLoading = true);
+    
     try {
       final user = supabase.auth.currentUser;
       if (user != null) {
@@ -36,7 +39,7 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
         }
       }
     } catch (e) {
-      // Handle error gracefully
+      debugPrint('Error loading profile: $e');
     } finally {
       if (mounted) {
         setState(() {
@@ -56,10 +59,11 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
         (route) => false,
       );
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error logging out: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error logging out: $e')),
+        );
+      }
     }
   }
 
@@ -67,111 +71,108 @@ class _PassengerProfileScreenState extends State<PassengerProfileScreen> {
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
     
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "My Profile",
-                    style: TextStyle(
-                      color: colors.textPrimary,
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return Padding(
+      padding: const EdgeInsets.all(24),
+      child: isLoading
+          ? Center(child: CircularProgressIndicator(color: colors.accent))
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "My Profile",
+                  style: TextStyle(
+                    color: colors.textPrimary,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 30),
-                  GlassPanel(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: colors.accent,
-                              shape: BoxShape.circle,
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              fullName.isNotEmpty ? fullName[0].toUpperCase() : "P",
-                              style: TextStyle(
-                                color: colors.buttonText,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 20),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  fullName,
-                                  style: TextStyle(
-                                    color: colors.textPrimary,
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  userEmail,
-                                  style: TextStyle(
-                                    color: colors.textSecondary,
-                                    fontSize: 14,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  GlassPanel(
+                ),
+                const SizedBox(height: 30),
+                GlassPanel(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Row(
-                          children: [
-                            Icon(Icons.dark_mode_outlined, color: colors.textSecondary),
-                            const SizedBox(width: 12),
-                            Text(
-                              "Dark Mode",
-                              style: TextStyle(color: colors.textPrimary, fontSize: 16),
+                        Container(
+                          width: 60,
+                          height: 60,
+                          decoration: BoxDecoration(
+                            color: colors.accent,
+                            shape: BoxShape.circle,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            fullName.isNotEmpty ? fullName[0].toUpperCase() : "P",
+                            style: TextStyle(
+                              color: colors.buttonText,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
                             ),
-                          ],
+                          ),
                         ),
-                        ValueListenableBuilder<ThemeMode>(
-                          valueListenable: ThemeModeController.instance,
-                          builder: (context, mode, _) {
-                            return Switch(
-                              value: mode == ThemeMode.dark,
-                              activeThumbColor: colors.accent,
-                              onChanged: (v) => ThemeModeController.instance.setDark(v),
-                            );
-                          },
+                        const SizedBox(width: 20),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                fullName,
+                                style: TextStyle(
+                                  color: colors.textPrimary,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                userEmail,
+                                style: TextStyle(
+                                  color: colors.textSecondary,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
                   ),
-                  const Spacer(),
-                  GlassGradientButton(
-                    label: "Log Out",
-                    onTap: _logout,
+                ),
+                const SizedBox(height: 24),
+                GlassPanel(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.dark_mode_outlined, color: colors.textSecondary),
+                          const SizedBox(width: 12),
+                          Text(
+                            "Dark Mode",
+                            style: TextStyle(color: colors.textPrimary, fontSize: 16),
+                          ),
+                        ],
+                      ),
+                      ValueListenableBuilder<ThemeMode>(
+                        valueListenable: ThemeModeController.instance,
+                        builder: (context, mode, _) {
+                          return Switch(
+                            value: mode == ThemeMode.dark,
+                            activeThumbColor: colors.accent,
+                            onChanged: (v) => ThemeModeController.instance.setDark(v),
+                          );
+                        },
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-      ),
+                ),
+                const Spacer(),
+                GlassGradientButton(
+                  label: "Log Out",
+                  onTap: _logout,
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
     );
   }
 }
