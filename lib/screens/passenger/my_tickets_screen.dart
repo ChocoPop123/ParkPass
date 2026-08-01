@@ -96,8 +96,11 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
                                       MaterialPageRoute(
                                         builder: (_) => TicketConfirmationScreen(
                                           bookingId: booking['id'],
+                                          passengerName:booking['passenger_name'],
+                                          route: "${trip['origin']}'n ${trip['destination']}",
                                           seatLabel: "Seat ${booking['seat_number']}",
                                           tripId: trip['id'],
+                                          tripDate:trip['date'],
                                         ),
                                       ),
                                     );

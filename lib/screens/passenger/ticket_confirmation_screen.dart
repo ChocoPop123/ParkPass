@@ -184,7 +184,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                                 'route': widget.route,
                                 'seat':widget.seatLabel,
                                 'date':widget.tripDate
-                              }).
+                              }),
 
                               version: QrVersions.auto,
                               size: 180.0,
