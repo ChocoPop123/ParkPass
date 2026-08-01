@@ -4,17 +4,24 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/glass_widgets.dart';
 import 'passenger_home.dart';
+import 'dart:convert';
 
 class TicketConfirmationScreen extends StatefulWidget {
   final String bookingId;
+  final String passengerName;
+  final String route;
   final String seatLabel;
   final String tripId;
+  final String tripDate;
 
   const TicketConfirmationScreen({
     super.key,
     required this.bookingId,
+    required this.passengerName,
+    required this.route,
     required this.seatLabel,
     required this.tripId,
+    required this.tripDate,
   });
 
   @override
@@ -171,7 +178,14 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                               ],
                             ),
                             child: QrImageView(
-                              data: widget.bookingId,
+                              data: jsonEncode({
+                                'bookingId': widget.bookingId,
+                                'name': widget.passengerName,
+                                'route': widget.route,
+                                'seat':widget.seatLabel,
+                                'date':widget.tripDate
+                              }).
+
                               version: QrVersions.auto,
                               size: 180.0,
                             ),
