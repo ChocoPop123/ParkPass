@@ -34,9 +34,12 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
 
   Future<void> _fetchTicketDetails() async {
     try {
+      // Now also pulls the company name via routes -> companies, so both
+      // the ticket card and the QR payload can show who the ticket is
+      // actually with, not just the route.
       final data = await supabase
           .from('bookings')
-          .select('*, trips(*, routes(*))')
+          .select('*, trips(*, routes(*, companies(name)))')
           .eq('id', widget.bookingId)
           .single();
 
@@ -55,10 +58,65 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
     }
   }
 
+  String _companyName() {
+    final company = ticketData?['trips']?['routes']?['companies'];
+    return company?['name'] as String? ?? 'Unknown Company';
+  }
+
+  DateTime _departureTime() {
+    return DateTime.parse(ticketData!['trips']['departure_time']);
+  }
+
+  // Business rule: a ticket is valid for boarding up to 2 hours after the
+  // trip's scheduled departure. Adjust this window if a different grace
+  // period is wanted.
+  DateTime _validUntil() {
+    return _departureTime().add(const Duration(hours: 2));
+  }
+
+  bool _isPaid() {
+    final status = (ticketData?['status'] as String? ?? '').toLowerCase();
+    return status == 'paid';
+  }
+
+  // Builds the actual data encoded into the QR code. A conductor's scanner
+  // should still verify this against the database before checking someone
+  // in (never trust a client-supplied QR payload as proof of payment on
+  // its own) — but encoding this much directly in the QR means the ticket
+  // is still human-readable / diagnosable even from just a raw scan, and
+  // gives the conductor's app everything it needs to show a summary
+  // immediately without waiting on a second lookup.
+  //
+  // Plain labeled text instead of JSON, so a raw scan (even from a generic
+  // scanner app) shows a readable ticket stub instead of a data dump.
+  String _buildQrPayload() {
+    final currency = NumberFormat('#,##0', 'en_US');
+
+    final buffer = StringBuffer()
+      ..writeln('===== PARKPASS TICKET =====')
+      ..writeln(_companyName())
+      ..writeln('${ticketData!['trips']['routes']['origin']} → ${ticketData!['trips']['routes']['destination']}')
+      ..writeln('----------------------------')
+      ..writeln('Seat: ${widget.seatLabel}')
+      ..writeln('Bus Class: ${ticketData!['trips']['bus_class'] ?? 'Ordinary'}')
+      ..writeln('Plate: ${ticketData!['trips']['bus_number_plate'] ?? 'N/A'}')
+      ..writeln('----------------------------')
+      ..writeln('Amount Paid: UGX ${currency.format(ticketData!['amount_paid'])}')
+      ..writeln('Payment: ${_isPaid() ? 'CONFIRMED' : (ticketData!['status'] as String? ?? 'UNKNOWN').toUpperCase()}')
+      ..writeln('----------------------------')
+      ..writeln('Departs: ${DateFormat('dd MMM yyyy, hh:mm a').format(_departureTime())}')
+      ..writeln('Valid Until: ${DateFormat('dd MMM yyyy, hh:mm a').format(_validUntil())}')
+      ..writeln('----------------------------')
+      ..writeln('Booking ID: ${widget.bookingId}')
+      ..writeln('============================');
+
+    return buffer.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AuthBackground(
@@ -109,6 +167,19 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                       padding: const EdgeInsets.all(24),
                       child: Column(
                         children: [
+                          // Company name
+                          Text(
+                            _companyName(),
+                            style: TextStyle(
+                              color: colors.accent,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 0.5,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 6),
+
                           // Route Header
                           Text(
                             "${ticketData!['trips']['routes']['origin']} → ${ticketData!['trips']['routes']['destination']}",
@@ -146,11 +217,19 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                           // Details Row 3
                           _buildDetailRow(
                             "Departure Time",
-                            DateFormat('dd MMM yyyy, hh:mm a').format(
-                              DateTime.parse(ticketData!['trips']['departure_time']),
-                            ),
+                            DateFormat('dd MMM yyyy, hh:mm a').format(_departureTime()),
                             "Status",
-                            ticketData!['status'].toUpperCase(),
+                            (ticketData!['status'] as String? ?? '').toUpperCase(),
+                            colors,
+                          ),
+                          const SizedBox(height: 16),
+
+                          // Validity row
+                          _buildDetailRow(
+                            "Valid Until",
+                            DateFormat('dd MMM yyyy, hh:mm a').format(_validUntil()),
+                            "Payment",
+                            _isPaid() ? 'PAID ✓' : 'NOT PAID',
                             colors,
                           ),
 
@@ -171,7 +250,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                               ],
                             ),
                             child: QrImageView(
-                              data: widget.bookingId,
+                              data: _buildQrPayload(),
                               version: QrVersions.auto,
                               size: 180.0,
                             ),
