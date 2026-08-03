@@ -17,7 +17,6 @@ void main() async {
 
 class ParkPassApp extends StatefulWidget {
   const ParkPassApp({super.key});
-
   @override
   State<ParkPassApp> createState() => _ParkPassAppState();
 }
@@ -56,18 +55,29 @@ class _ParkPassAppState extends State<ParkPassApp> {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: mode,
-          home: const AuthGate(),
+          // Wait for Supabase to finish initializing (and restore any saved
+          // session) before showing AuthGate. Without this, AuthGate could
+          // check for a session before Supabase had loaded it from disk,
+          // and would incorrectly fall through to the login screen every
+          // time the app started.
+          home: _error != null
+              ? Scaffold(
+            body: Center(child: Text('Startup error: $_error')),
+          )
+              : !_ready
+              ? const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          )
+              : const AuthGate(),
         );
       },
     );
-
   }
 }
 
 // This widget decides what to show based on login state.
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<AuthState>(
@@ -75,7 +85,6 @@ class AuthGate extends StatelessWidget {
       builder: (context, snapshot) {
         final session = Supabase.instance.client.auth.currentSession;
         if (session == null) return const LoginScreen();
-
         return FutureBuilder<Map<String, dynamic>?>(
           future: AuthService().getCurrentUserProfile(),
           builder: (context, profileSnapshot) {
@@ -84,14 +93,11 @@ class AuthGate extends StatelessWidget {
                 body: Center(child: CircularProgressIndicator()),
               );
             }
-
             final profile = profileSnapshot.data;
             if (profile == null) return const LoginScreen();
-
             final role = profile['role'] as String?;
             final companyId = profile['company_id'] as String?;
             final approvalStatus = profile['approval_status'] as String?;
-
             if (role == 'admin') {
               return companyId == null
                   ? const CreateCompanyScreen()
