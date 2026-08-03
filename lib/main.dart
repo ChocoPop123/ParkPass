@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/passenger/passenger_home.dart';
 import 'theme/app_theme.dart';
@@ -38,6 +39,12 @@ class _ParkPassAppState extends State<ParkPassApp> {
         publishableKey: 'sb_publishable_VLRPU3TJ8rDeSb0S6MIRMQ_ua5y61dP',
       );
       await ThemeModeController.instance.load();
+
+      // Sets up the local-notifications plugin and timezone data once, so
+      // both instant ("ticket generated") and scheduled (15-min-before
+      // departure) notifications work from anywhere in the app afterward.
+      await NotificationService.instance.init();
+
       if (mounted) setState(() => _ready = true);
     } catch (e) {
       if (mounted) setState(() => _error = e.toString());

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../widgets/glass_widgets.dart';
+import '../../services/notification_service.dart';
 import 'ticket_confirmation_screen.dart';
 
 class PaymentScreen extends StatefulWidget {
@@ -65,9 +66,43 @@ class _PaymentScreenState extends State<PaymentScreen> {
           .eq('trip_id', widget.tripId)
           .eq('seat_number', widget.seatNumberInt);
 
+      // 3. Fire the "ticket generated" notification and schedule the
+      // 15-minutes-before-departure reminder. This needs the route names
+      // and departure time, which the booking insert above doesn't return,
+      // so it's fetched here with a small trip lookup. If this lookup
+      // fails (e.g. no internet right at this instant), the booking has
+      // already succeeded — so we don't want to block the user from
+      // reaching their ticket over a notification failing.
+      try {
+        final tripInfo = await supabase
+            .from('trips')
+            .select('departure_time, routes(origin, destination)')
+            .eq('id', widget.tripId)
+            .single();
+
+        final route = tripInfo['routes'];
+        final origin = route['origin'] as String;
+        final destination = route['destination'] as String;
+        final departureTime = DateTime.parse(tripInfo['departure_time']);
+
+        await NotificationService.instance.showTicketGenerated(
+          origin: origin,
+          destination: destination,
+        );
+
+        await NotificationService.instance.scheduleDepartureReminder(
+          bookingId: bookingData['id'],
+          origin: origin,
+          destination: destination,
+          departureTime: departureTime,
+        );
+      } catch (notificationError) {
+        debugPrint('Notification setup failed (booking still succeeded): $notificationError');
+      }
+
       if (!mounted) return;
 
-      // 3. Navigate to Ticket & QR Code Screen
+      // 4. Navigate to Ticket & QR Code Screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -92,7 +127,7 @@ class _PaymentScreenState extends State<PaymentScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AuthBackground(
@@ -181,9 +216,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                                "Mobile Money", 
+                                "Mobile Money",
                                 style: TextStyle(
-                                    color: paymentMethod == 'mobile_money' ? colors.buttonText : colors.textSecondary, 
+                                    color: paymentMethod == 'mobile_money' ? colors.buttonText : colors.textSecondary,
                                     fontWeight: FontWeight.bold
                                 )
                             ),
@@ -203,9 +238,9 @@ class _PaymentScreenState extends State<PaymentScreen> {
                             ),
                             alignment: Alignment.center,
                             child: Text(
-                                "Bank Card", 
+                                "Bank Card",
                                 style: TextStyle(
-                                    color: paymentMethod == 'card' ? colors.buttonText : colors.textSecondary, 
+                                    color: paymentMethod == 'card' ? colors.buttonText : colors.textSecondary,
                                     fontWeight: FontWeight.bold
                                 )
                             ),
