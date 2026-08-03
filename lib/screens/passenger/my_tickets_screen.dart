@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/glass_widgets.dart';
 import 'ticket_confirmation_screen.dart';
@@ -15,6 +17,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
   final supabase = Supabase.instance.client;
   List<Map<String, dynamic>> myBookings = [];
   bool isLoading = true;
+  bool isOffline = false;
 
   @override
   void initState() {
@@ -22,37 +25,83 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
     _fetchMyTickets();
   }
 
+  String? _cacheKey() {
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return null;
+    return 'cached_bookings_$userId';
+  }
+
   Future<void> _fetchMyTickets() async {
     if (!mounted) return;
     setState(() => isLoading = true);
-    
+
+    final cacheKey = _cacheKey();
+    final prefs = await SharedPreferences.getInstance();
+
     try {
       final user = supabase.auth.currentUser;
       if (user == null) {
         if (mounted) setState(() => isLoading = false);
         return;
       }
-      
+
       final userId = user.id;
+      // Also pulls companies(name) now, matching what TicketConfirmationScreen
+      // expects — so the per-ticket cache below has everything that screen
+      // needs, not just what the list view shows.
       final data = await supabase
           .from('bookings')
-          .select('*, trips(*, routes(*))')
+          .select('*, trips(*, routes(*, companies(name)))')
           .eq('user_id', userId)
           .order('created_at', ascending: false);
 
+      final bookings = List<Map<String, dynamic>>.from(data);
+
+      // Save a local copy so the list itself is still viewable with no connection.
+      if (cacheKey != null) {
+        await prefs.setString(cacheKey, jsonEncode(bookings));
+      }
+
+      // Also save each ticket individually, under the same cache key format
+      // TicketConfirmationScreen uses. Without this, tapping into a ticket
+      // you'd never opened before while online would have nothing to fall
+      // back to once offline.
+      for (final booking in bookings) {
+        final id = booking['id'];
+        if (id != null) {
+          await prefs.setString('cached_ticket_$id', jsonEncode(booking));
+        }
+      }
+
       if (mounted) {
         setState(() {
-          myBookings = List<Map<String, dynamic>>.from(data);
+          myBookings = bookings;
           isLoading = false;
+          isOffline = false;
         });
       }
     } catch (e) {
-      debugPrint('Error loading tickets: $e');
+      debugPrint('Error loading tickets, checking cache: $e');
+
+      // No internet (or the request failed) — fall back to the last
+      // successful fetch instead of leaving the screen blank.
+      final cached = cacheKey != null ? prefs.getString(cacheKey) : null;
+
       if (mounted) {
-        setState(() => isLoading = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading tickets: $e')),
-        );
+        if (cached != null) {
+          final decoded =
+          (jsonDecode(cached) as List).cast<Map<String, dynamic>>();
+          setState(() {
+            myBookings = decoded;
+            isLoading = false;
+            isOffline = true;
+          });
+        } else {
+          setState(() => isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error loading tickets: $e')),
+          );
+        }
       }
     }
   }
@@ -60,7 +109,7 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
   @override
   Widget build(BuildContext context) {
     final colors = AppColors.of(context);
-    
+
     return RefreshIndicator(
       onRefresh: _fetchMyTickets,
       color: colors.accent,
@@ -75,6 +124,19 @@ class _MyTicketsScreenState extends State<MyTicketsScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
+          if (isOffline) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Icon(Icons.cloud_off_rounded, size: 14, color: colors.textSecondary),
+                const SizedBox(width: 6),
+                Text(
+                  "Offline — showing last saved tickets",
+                  style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                ),
+              ],
+            ),
+          ],
           const SizedBox(height: 20),
           if (isLoading)
             Padding(

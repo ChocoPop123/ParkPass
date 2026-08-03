@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   final supabase = Supabase.instance.client;
@@ -61,17 +63,37 @@ class AuthService {
     return data['role'] as String?;
   }
 
-  // Fetches the logged-in user's FULL profile row (role, company_id, approval_status)
+  // Fetches the logged-in user's FULL profile row (role, company_id, approval_status).
+  //
+  // On success, the profile is saved locally. If the live fetch fails (e.g.
+  // no internet), the last saved profile is returned instead of null — this
+  // is what stops AuthGate from bouncing a logged-in user back to the login
+  // screen just because they went offline.
   Future<Map<String, dynamic>?> getCurrentUserProfile() async {
     final userId = supabase.auth.currentUser?.id;
     if (userId == null) return null;
 
-    final data = await supabase
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
+    final prefs = await SharedPreferences.getInstance();
+    final cacheKey = 'cached_profile_$userId';
 
-    return data;
+    try {
+      final data = await supabase
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (data != null) {
+        await prefs.setString(cacheKey, jsonEncode(data));
+      }
+
+      return data;
+    } catch (e) {
+      final cached = prefs.getString(cacheKey);
+      if (cached != null) {
+        return jsonDecode(cached) as Map<String, dynamic>;
+      }
+      rethrow;
+    }
   }
 }

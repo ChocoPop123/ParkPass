@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import '../../widgets/glass_widgets.dart';
 import 'passenger_home.dart';
@@ -25,6 +27,7 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
   final supabase = Supabase.instance.client;
   Map<String, dynamic>? ticketData;
   bool isLoading = true;
+  bool isOffline = false;
 
   @override
   void initState() {
@@ -32,7 +35,11 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
     _fetchTicketDetails();
   }
 
+  String get _cacheKey => 'cached_ticket_${widget.bookingId}';
+
   Future<void> _fetchTicketDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+
     try {
       // Now also pulls the company name via routes -> companies, so both
       // the ticket card and the QR payload can show who the ticket is
@@ -43,11 +50,29 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
           .eq('id', widget.bookingId)
           .single();
 
+      // Save this exact ticket locally so it (and its QR code) can still be
+      // shown with no internet connection.
+      await prefs.setString(_cacheKey, jsonEncode(data));
+
       setState(() {
         ticketData = data;
         isLoading = false;
+        isOffline = false;
       });
     } catch (e) {
+      // No internet (or the request failed) — fall back to the last saved
+      // copy of this exact ticket instead of showing "not found".
+      final cached = prefs.getString(_cacheKey);
+
+      if (cached != null) {
+        setState(() {
+          ticketData = jsonDecode(cached) as Map<String, dynamic>;
+          isLoading = false;
+          isOffline = true;
+        });
+        return;
+      }
+
       setState(() {
         isLoading = false;
       });
@@ -159,6 +184,20 @@ class _TicketConfirmationScreenState extends State<TicketConfirmationScreen> {
                     ),
                     textAlign: TextAlign.center,
                   ),
+                  if (isOffline) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.cloud_off_rounded, size: 14, color: colors.textSecondary),
+                        const SizedBox(width: 6),
+                        Text(
+                          "Offline — showing saved ticket",
+                          style: TextStyle(color: colors.textSecondary, fontSize: 12),
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 24),
 
                   // Ticket Card with GlassPanel
